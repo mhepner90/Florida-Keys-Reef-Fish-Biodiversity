@@ -5,8 +5,12 @@ date: "November 5, 2017"
 output: html_document
 ---
 
+Library's used to compute diversity indices, statistical test, and to produce plots 
+
 ```{r librarys}
 
+library(AICcmodavg) #AIC
+library(ade4) #mantel.rtest
 library(ape) #read.tree, as.phylo 
 library(clue) #cl_consensus, cl_ultrametric, cl_dissimilarity,cl_ultrametric
 library(cowplot) #get_legend 
@@ -20,14 +24,20 @@ library(grid)
 library(gridExtra) #grid.arrange
 library(htmlwidgets) #save interactive treemap and pie chart 
 library(lattice)
+library(magrittr) # %$%
+library(MASS)# contains boxcox function
 library(mgcv) #gam
+library(moments) # contains skewness function
+library(nortest) #checks for normality 
 library(parallel) #clusterEvalQ,clusterExport,detectCores,makeCluster,parLapply
 library(plotrix) #std.error
+library(psych) #pairs.panels 
 library(purrr) #map
 library(rcompanion) #cldList
 library(readr) #saveRDS, read_rds, readRDS 
 library(reshape2) #melt
 #devtools::install_github('jeremiaheb/rvc')
+library(rpsychi) #statistical tests using summary data
 library(rvc) #getPSUAbundance, getStrataAbundance, getDomainAbundance 
 library(tidyverse) #select, filter, mutate, group_by, summarize 
 library(treemap) #treemap
@@ -136,7 +146,16 @@ if(!file.exists("psu_fk_abun.csv")){
 
 ```
 
-Clean data
+#Clean data 
+
+Cleaned the data by:
+- removed sampling events with no individuals
+- removed sampling events with only 1 individuals
+- removed species not identified to species level (e.g., genus)
+- removed sampling events with uncharactertistically large abundance values 
+- removed species that did not occur in at least 5% of the entire dateset
+
+Left with 108 species of reef fish and 5,235 sampling events between 1999 and 2016 
 
 ```{r clean up data }
 
@@ -466,14 +485,26 @@ if(!file.exists('diversity_data.csv')){
   
   all_data = inner_join(diversity,sample_data)
   
-  write_csv(all_data, "diversity_data.csv")
+  mpa_data = all_data %>%
+    mutate(MPA_NR= as.numeric(MPA_NR))%>%
+    mutate(MPA_NAME = 
+             ifelse(MPA_NR == 0| MPA_NR == 27| MPA_NR ==28, 
+                    "Not Protected",
+                    ifelse(MPA_NR == 1|MPA_NR ==2|MPA_NR ==3|MPA_NR ==4|MPA_NR ==5|MPA_NR ==6|MPA_NR ==7|MPA_NR ==9|MPA_NR ==10|MPA_NR ==11|MPA_NR ==12|MPA_NR ==14|MPA_NR ==15|MPA_NR ==16|MPA_NR ==18|MPA_NR ==21|MPA_NR ==22|MPA_NR ==23, 
+                           "Sanctuary Preservation Area",
+                           ifelse(MPA_NR ==8|MPA_NR ==13|MPA_NR ==17|MPA_NR ==19, 
+                                  "Special Use",
+                                  ifelse(MPA_NR == 20, 
+                                         "Ecological Reserve", "NA")))))
+  
+  write_csv(mpa_data, "diversity_data.csv")
   }
   
 ```
 
-Plots 
+#Plots
 
-```{r diversity by year}
+```{r plot all diversity by year}
 
 #plot species richness, Simpson, Shannon, and Functional diversity through time 
 
@@ -521,7 +552,7 @@ ggsave(file="diversity_plot.pdf", width=7, height=7, path="plots")
 
 ```
 
-```{r diversity by year and no take marine zoneS}
+```{r plot each diversity by year and no take marine zones}
 
 all_matrices_data = read_csv("diversity_data.csv")
 
@@ -673,38 +704,9 @@ ggsave(file="all_indices_by_year_and_protection.pdf", g_prot, width=10, height=7
 
 ```
 
-nonparametric Kruskal-Wallis test for significance by level of protection 
-
-```{r Kruskal-Wallis test for indices by protection}
-
-all_matrices_data = read_csv("diversity_data.csv")
-
-all_matrices_data$PROT = factor(all_matrices_data$PROT, levels=c("0","1"))
-levels(all_matrices_data$PROT)
-
-#richness 
-kruskal.test(all_matrices_data$richness~all_matrices_data$PROT)
-#Kruskal-Wallis chi-squared = 111.72, df = 1, p-value < 2.2e-16
-
-#Shannon 
-kruskal.test(all_matrices_data$shannon~all_matrices_data$PROT)
-#Kruskal-Wallis chi-squared = 33.185, df = 1, p-value = 8.377e-09
-
-#Simpson 
-kruskal.test(all_matrices_data$simpson~all_matrices_data$PROT)
-#Kruskal-Wallis chi-squared = 26.378, df = 1, p-value = 2.808e-07
-
-#Functional
-kruskal.test(all_matrices_data$func.div~all_matrices_data$PROT)
-#Kruskal-Wallis chi-squared = 26.496, df = 1, p-value = 2.641e-07
-
-## All indices are significantly different by level of protection
-
-```
-
 Plot diversity indices by grouped strata 
 
-```{r diversity by year and grouped strata}
+```{r plot by each diversity by year and grouped strata}
 
 all_matrices_data = read_csv("diversity_data.csv")
 
@@ -752,7 +754,7 @@ rich_gs= ggplot(matrices_strat_grouped,aes(x=YEAR,y=richness_mean, colour=STRAT_
   geom_line(aes(group=STRAT_GROUPED),lwd=1) +
   geom_point(size=3) +
  geom_errorbar(aes(ymin=richness_mean-richness_se, ymax=richness_mean+richness_se), width=.1)+
-  labs(title= "A) Richness", x="Year", y="Mean ENS", colour = "Strata")+
+  labs(title= "A) Richness", x="Year", y="Mean effective \nnumber of species (± SE)", colour = "Strata")+
   scale_colour_manual(labels=c("High reef", "Linear reef", "Patch reef"), values= c("red", "green", "blue"))+
   scale_x_continuous(limits = c(1999, 2016), breaks = c(2000,2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016), labels=c("2000","","2004","","2008","","2012","","2016"))+
   theme_bw()+
@@ -770,7 +772,7 @@ shan_gs= ggplot(matrices_strat_grouped,aes(x=YEAR,y=shannon_mean, colour=STRAT_G
   geom_line(aes(group=STRAT_GROUPED),lwd=1) +
   geom_point(size=3) +
   geom_errorbar(aes(ymin=shannon_mean-shannon_se, ymax=shannon_mean+shannon_se), width=.1)+
-  labs(title= "B) Shannon", x="Year", y="Mean ENS", colour = "Strata")+
+  labs(title= "B) Shannon", x="Year", y="Mean effective \nnumber of species (± SE)", colour = "Strata")+
   scale_colour_manual(labels=c("High reef", "Linear reef", "Patch reef"), values= c("red", "green", "blue"))+
   scale_x_continuous(limits = c(1999, 2016), breaks = c(2000,2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016), labels=c("2000","","2004","","2008","","2012","","2016"))+
   theme_bw()+
@@ -788,7 +790,7 @@ sim_gs= ggplot(matrices_strat_grouped,aes(x=YEAR,y=simpson_mean, colour=STRAT_GR
   geom_line(aes(group=STRAT_GROUPED),lwd=1) +
   geom_point(size=3) +
   geom_errorbar(aes(ymin=simpson_mean-simpson_se, ymax=simpson_mean+simpson_se), width=.1)+
-  labs(title= "C) Simpson", x="Year", y="Mean ENS", colour = "Strata")+
+  labs(title= "C) Simpson", x="Year", y="Mean effective \nnumber of species (± SE)", colour = "Strata")+
   scale_colour_manual(labels=c("High reef", "Linear reef", "Patch reef"), values= c("red", "green", "blue"))+
   scale_x_continuous(limits = c(1999, 2016), breaks = c(2000,2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016), labels=c("2000","","2004","","2008","","2012","","2016"))+
   theme_bw()+
@@ -806,7 +808,7 @@ func_gs= ggplot(matrices_strat_grouped,aes(x=YEAR,y=func.div_mean, colour=STRAT_
   geom_line(aes(group=STRAT_GROUPED),lwd=1) +
   geom_point(size=3) +
   geom_errorbar(aes(ymax=func.div_mean+func.div_se,ymin=func.div_mean-func.div_se),width=0.1)+
-  labs(title= "D) Functional", x="Year", y="Mean ENS", colour = "Strata")+
+  labs(title= "D) Functional", x="Year", y="Mean effective \nnumber of species (± SE)", colour = "Strata")+
   scale_colour_manual(labels=c("High reef", "Linear reef", "Patch reef"), values= c("red", "green", "blue"))+
   scale_x_continuous(limits = c(1999, 2016), breaks = c(2000,2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016), labels=c("2000","","2004","","2008","","2012","","2016"))+
   theme_bw()+
@@ -832,7 +834,388 @@ legend_gs_horiz <- get_legend(for_legend_gs_horiz)
 
 #all plots on one page
 g_gs <- grid.arrange(rich_gs,shan_gs,sim_gs,func_gs,ncol=2)
-ggsave(file="all_indices_by_year_and_strata_grouped.pdf", g_gs, width=7, height=10, path="plots")
+ggsave(file="all_indices_by_year_and_strata_grouped.pdf", g_gs, width=10, height=7, path="plots")
+
+```
+
+#Statistical tests
+
+```{r test for assumptions of normality }
+
+all_matrices_data = read_csv("diversity_data.csv")
+
+# Manipulate data frame to get total number of PSUs sampled per YEAR and STRATA and also get total PSUs sampled for each YEAR
+diversity_data = all_matrices_data
+
+diversity_data$dum1 <- 1
+diversity_data_sum1 <- d_fk %>% group_by(YEAR,STRAT,PRIMARY_SAMPLE_UNIT) %>% summarise(sum1=sum(dum1))
+diversity_data_sum1$dum2 <- 1
+diversity_data_sum2 <- diversity_data_sum1 %>% group_by(YEAR,STRAT) %>% summarise(sum2=sum(dum2))
+diversity_data_sum3 <- dcast(d_fk_sum2, YEAR ~ STRAT, value.var="sum2")
+diversity_data_sum3$total <- rowSums(diversity_data_sum3[,-1], na.rm=TRUE)
+write.csv(diversity_data_sum3, 'fk_sample_summary.csv',row.names=FALSE) 
+
+diversity_data = diversity_data %>%
+  group_by(YEAR,PRIMARY_SAMPLE_UNIT, STRAT)
+
+# 1. Run ANOVA to get residuals so we can use them to test assumptions of normality and equal variances
+diversity_data$fYEAR <- as.factor(diversity_data$YEAR) # categorical variables are factors
+diversity_data$fSTRAT <- as.factor(diversity_data$STRAT) # categorical variables are factors
+
+#Richness
+
+# since there might be an interaction between YEAR and STRAT (i.e., diversity may not change through time consistently across strata or vice versa) use "*" in your model to include an interaction term
+richness_aov <- aov(richness~fYEAR*fSTRAT, data=diversity_data) 
+diversity_data$resids_rich <- residuals(richness_aov) # get residuals
+diversity_data$pred_val_rich <- predict(richness_aov) # get predicted values
+
+#Shannon 
+shannon_aov <- aov(shannon~fYEAR*fSTRAT, data=diversity_data)
+diversity_data$resids_shan <- residuals(shannon_aov) # get residuals
+diversity_data$pred_val_shan <- predict(shannon_aov) # get predicted values
+
+#Simpson
+simpson_aov <- aov(simpson~fYEAR*fSTRAT, data=diversity_data)
+diversity_data$resids_simp <- residuals(simpson_aov) # get residuals
+diversity_data$pred_val_simp <- predict(simpson_aov) # get predicted values
+
+#Functional
+func_aov <- aov(func.div~fYEAR*fSTRAT, data=diversity_data)
+diversity_data$resids_func <- residuals(func_aov) # get residuals
+diversity_data$pred_val_func <- predict(func_aov) # get predicted values
+
+# 2. Examine plots of residuals to qualitatively check for normality and equal variances
+ggplot() + geom_density(aes(x=diversity_data$resids_rich)) # look at distribution of residuals
+#distribution looks good
+plot(richness_aov)
+# plot 1: Residuals vs Fitted values - data points should be distibuted evenly above and below the line and across the plot...if they are not, this indicates a violation of assumptions
+  # plot 2: Q-Q plot - data points\ should fall more or less along dashed line...if they do not, this indicates a violation of assumptions
+#looks good
+
+ggplot() + geom_density(aes(x=diversity_data$resids_shan))
+#distribution looks good
+plot(shannon_aov)
+#residual verse fitted more in the middle than left or right
+#Q-Q plot looks alright
+
+ggplot() + geom_density(aes(x=diversity_data$resids_simp))
+#distribution looks good
+plot(simpson_aov)
+#residual verse fitted more in the middle and right than left
+#Q-Q plot looks alright
+
+ggplot() + geom_density(aes(x=diversity_data$resids_func))
+#distribution looks good
+plot(func_aov)
+#residual verse fitted looks pretty good
+#Q-Q plot looks alright 
+
+# 3 Shapiro-Wilk test - p-value < 0.05 means the data are NOT normally distributed
+
+#richness
+diversity_data %$% shapiro.test(resids_rich[1:5000]) 
+#W = 0.99298, p-value = 5.484e-15
+#Not normally distributed 
+
+#shannon
+diversity_data %$% shapiro.test(resids_shan[1:5000]) 
+#W = 0.99963, p-value = 0.5044
+
+
+#simpson
+diversity_data %$% shapiro.test(resids_simp[1:5000]) 
+#W = 0.99474, p-value = 1.587e-12
+#Not normally distributed
+
+#functional
+diversity_data %$% shapiro.test(resids_func[1:5000]) 
+#W = 0.99699, p-value = 1.816e-08
+#Not normally distributed
+
+# 4 Test for skew - greater than zero is evidence for having skew; 
+#test with t-test - p-value < 0.05 means data are skewed
+
+# richness
+skewness(diversity_data$resids_rich) #-0.3158723
+t<- skewness(diversity_data$resids_rich) %>%
+  divide_by(sqrt(6/length(diversity_data$resids_rich))) # t-value -9.330271
+# probability of the t-value by chance alone when skew is zero; pt=cummulative density function of t-dist, first number=calculated t-value; second=df
+1-pt(t,length(diversity_data$resids_rich)) 
+#p=1
+#distribution of residuals is NOT significantly skewed
+
+# shannon
+skewness(diversity_data$resids_shan) #0.02177687 (greater than zero so skewed)
+t<- skewness(diversity_data$resids_shan) %>%
+  divide_by(sqrt(6/length(diversity_data$resids_shan))) # t-value 0.6432476
+1-pt(t,length(diversity_data$resids_shan)) #p-value=0.2600458, greater than 0.05
+# distribution of residuals is NOT significantly skewed
+  
+#Simpson
+skewness(diversity_data$resids_simp) #0.27978 (greater than zero so skewed)
+t<- skewness(diversity_data$resids_simp) %>% 
+  divide_by(sqrt(6/length(diversity_data$resids_simp))) # t-value 8.264173
+1-pt(t,length(diversity_data$resids_simp)) #p=1.110223e-16, not greater than 0.05
+# distribution of residuals ARE significantly skewed
+  
+#Functional
+skewness(diversity_data$resids_func) #-0.2158813 (not skewed)
+t<- skewness(diversity_data$resids_func) %>%
+  divide_by(sqrt(6/length(diversity_data$resids_func))) # t-value -6.376726
+1-pt(t,length(diversity_data$resids_func)) #1, 
+# distribution of residuals is NOT significantly skewed
+
+#4 Bartlett test - p-value < 0.05 means data do not have equal variances across groups
+#Richness
+bartlett.test(diversity_data$resids_rich~diversity_data$fYEAR)
+#Bartlett's K-squared = 80.132, df = 15, p-value = 6.608e-11
+bartlett.test(diversity_data$resids_rich~diversity_data$fSTRAT)
+#Bartlett's K-squared = 110.04, df = 6, p-value < 2.2e-16
+# variances of residuals are significantly different among groups for both YEAR and STRAT
+
+#Shannon
+bartlett.test(diversity_data$resids_shan~diversity_data$fYEAR)
+#Bartlett's K-squared = 40.706, df = 15, p-value = 0.0003545
+bartlett.test(diversity_data$resids_shan~diversity_data$fSTRAT)
+#Bartlett's K-squared = 37.594, df = 6, p-value = 1.348e-06
+# variances of residuals are significantly different among groups for both YEAR and STRAT
+
+#Simpson
+bartlett.test(diversity_data$resids_simp~diversity_data$fYEAR)
+#Bartlett's K-squared = 28.603, df = 15, p-value = 0.01809
+bartlett.test(diversity_data$resids_simp~diversity_data$fSTRAT)
+#Bartlett's K-squared = 62.452, df = 6, p-value = 1.427e-11
+# variances of residuals are significantly different among groups for both YEAR and STRAT
+
+#Functional
+bartlett.test(diversity_data$resids_func~diversity_data$fYEAR)
+#Bartlett's K-squared = 43.096, df = 15, p-value = 0.0001521
+bartlett.test(diversity_data$resids_func~diversity_data$fSTRAT)
+#Bartlett's K-squared = 43.44, df = 6, p-value = 9.542e-08
+# variances of residuals are significantly different among groups for both YEAR and STRAT
+
+#Data are not normally distributed (except shannon),skewed, and have unequal variances  
+
+```
+
+Transform data to better meet the assumptions of normality using Boxcox method 
+
+```{r transform data}
+
+# richness
+diversity_data %>%
+  boxcox(richness~fYEAR, data = .) %$%
+  x[which.max(y)] #x is lambda and y is values of likelihood
+# x = 1.353535; this output is the lambda value that you should use to transform data
+diversity_data %>%
+  boxcox(richness~fSTRAT, data = .) %$%
+  x[which.max(y)] #x is lambda and y is values of likelihood
+# x = 1.434343
+diversity_data <- diversity_data %>% mutate(richness_bc = (richness %>%
+  raise_to_power(1.39) %>% subtract(1) %>% divide_by(1.39))) # since x for YEAR and STRAT were so similar, I used something in between; use x/lambda in raise_to_power() and divide_by()
+
+# shannon
+diversity_data %>%
+  boxcox(shannon~fYEAR, data = .) %$%
+  x[which.max(y)] #x is lambda and y is values of likelihood
+# x = 0.9090909; this output is the lambda value that you should use to transform data
+diversity_data %>%
+  boxcox(shannon~fSTRAT, data = .) %$%
+  x[which.max(y)] #x is lambda and y is values of likelihood
+# x = 0.9090909
+diversity_data <- diversity_data %>% mutate(shannon_bc = (shannon %>%
+  raise_to_power(.9) %>% subtract(1) %>% divide_by(.9))) # use x/lambda in raise_to_power() and divide_by()
+
+# simpson
+diversity_data %>%
+  boxcox(simpson~fYEAR, data = .) %$%
+  x[which.max(y)] #x is lambda and y is values of likelihood
+# x = 0.6666667; this output is the lambda value that you should use to transform data
+diversity_data %>%
+  boxcox(simpson~fSTRAT, data = .) %$%
+  x[which.max(y)] #x is lambda and y is values of likelihood
+# x = 0.6666667
+diversity_data <- diversity_data %>% mutate(simpson_bc = (simpson %>%
+  raise_to_power(.67) %>% subtract(1) %>% divide_by(.67))) # use x/lambda in raise_to_power() and divide_by()
+
+#Functional
+diversity_data %>%
+  boxcox(func.div~fYEAR, data = .) %$%
+  x[which.max(y)] #x is lambda and y is values of likelihood
+# x =  1.555556; this output is the lambda value that you should use to transform data
+diversity_data %>%
+  boxcox(func.div~fSTRAT, data = .) %$%
+  x[which.max(y)] #x is lambda and y is values of likelihood
+# x = 1.555556
+diversity_data <- diversity_data %>% mutate(func.div_bc = (func.div %>%
+  raise_to_power(1.56) %>% subtract(1) %>% divide_by(1.56))) # use x/lambda in raise_to_power() and divide_by()
+
+# Retest assumptions with boxcox transformed data 
+
+# 1. Run ANOVA to get residuals so we can use them to test assumptions of normality and equal variances
+
+
+#Richness
+# since there might be an interaction between YEAR and STRAT (i.e., diversity may not change through time consistently across strata or vice versa) use "*" in your model to include an interaction term
+richness_aov <- aov(richness_bc~fYEAR*fSTRAT, data=diversity_data) 
+diversity_data$resids_rich_bc <- residuals(richness_aov) # get residuals
+diversity_data$pred_val_rich_bc <- predict(richness_aov) # get predicted values
+
+#Shannon 
+shannon_aov <- aov(shannon_bc~fYEAR*fSTRAT, data=diversity_data)
+diversity_data$resids_shan_bc <- residuals(shannon_aov) # get residuals
+diversity_data$pred_val_shan_bc <- predict(shannon_aov) # get predicted values
+
+#Simpson
+simpson_aov <- aov(simpson_bc~fYEAR*fSTRAT, data=diversity_data)
+diversity_data$resids_simp_bc <- residuals(simpson_aov) # get residuals
+diversity_data$pred_val_simp_bc <- predict(simpson_aov) # get predicted values
+
+#Functional
+func_aov <- aov(func.div_bc~fYEAR*fSTRAT, data=diversity_data)
+diversity_data$resids_func_bc <- residuals(func_aov) # get residuals
+diversity_data$pred_val_func_bc <- predict(func_aov) # get predicted values
+
+# 2. Examine plots of residuals to qualitatively check for normality and equal variances
+ggplot() + geom_density(aes(x=diversity_data$resids_rich_bc)) # look at distribution of residuals
+#distribution looks good
+plot(richness_aov)
+# plot 1: Residuals vs Fitted values - data points should be distibuted evenly above and below the line and across the plot...if they are not, this indicates a violation of assumptions
+  # plot 2: Q-Q plot - data points\ should fall more or less along dashed line...if they do not, this indicates a violation of assumptions
+#looks good
+ggplot(data = diversity_data) + geom_boxplot(mapping = aes(x = STRAT, y = richness_bc)) + facet_wrap(~YEAR, scales="free_y")
+
+ggplot() + geom_density(aes(x=diversity_data$resids_shan_bc))
+#distribution looks good
+plot(shannon_aov)
+#residual verse fitted more in the middle than left or right
+#Q-Q plot looks alright
+
+ggplot() + geom_density(aes(x=diversity_data$resids_simp_bc))
+#distribution looks good
+plot(simpson_aov)
+#residual verse fitted more to the right than left
+#Q-Q plot looks alright
+
+ggplot() + geom_density(aes(x=diversity_data$resids_func_bc))
+#distribution looks good
+plot(func_aov)
+#residual verse fitted looks pretty good
+#Q-Q plot looks alright 
+
+# 3 Shapiro-Wilk test - p-value < 0.05 means the data are NOT normally distributed
+
+#richness
+diversity_data %$% shapiro.test(resids_rich_bc[1:5000]) 
+#W = 0.99931, p-value = 0.05026
+#Normally distributed 
+
+#shannon
+diversity_data %$% shapiro.test(resids_shan_bc[1:5000]) 
+#W = 0.9994, p-value = 0.1046
+#Normally distributed
+
+#simpson
+diversity_data %$% shapiro.test(resids_simp_bc[1:5000]) 
+#W = 0.99921, p-value = 0.02236
+#Not normally distributed
+
+#functional
+diversity_data %$% shapiro.test(resids_func_bc[100:5000]) 
+#W = 0.99921, p-value = 0.02295
+#Not normally distributed
+
+# 4 Test for skew - greater than zero is evidence for having skew; 
+#test with t-test - p-value < 0.05 means data are skewed
+
+# richness
+skewness(diversity_data$resids_rich_bc) #-0.01965892 - not skewed 
+t<- skewness(diversity_data$resids_rich_bc) %>%
+  divide_by(sqrt(6/length(diversity_data$resids_rich_bc))) # t-value --0.58068731
+# probability of the t-value by chance alone when skew is zero; pt=cummulative density function of t-dist, first number=calculated t-value; second=df
+1-pt(t,length(diversity_data$resids_rich_bc)) 
+#p=0.7192619
+#distribution of residuals are NOT significantly skewed
+
+# shannon
+skewness(diversity_data$resids_shan_bc) #-0.06922674 (less than zero so skewed)
+t<- skewness(diversity_data$resids_shan_bc) %>%
+  divide_by(sqrt(6/length(diversity_data$resids_shan_bc))) # t-value 0.6432476
+1-pt(t,length(diversity_data$resids_shan_bc)) #p-value=0.9795391, greater than 0.05
+# distribution of residuals are NOT significantly skewed
+  
+#Simpson
+skewness(diversity_data$resids_simp_bc) #-0.04830602 (less than zero so skewed)
+t<- skewness(diversity_data$resids_simp_bc) %>% 
+  divide_by(sqrt(6/length(diversity_data$resids_simp_bc))) # t-value 
+1-pt(t,length(diversity_data$resids_simp)) #p=0.9231613
+# distribution of residuals are NOT significantly skewed
+  
+#Functional
+skewness(diversity_data$resids_func_bc) #-0.0475052 (less than zero so skewed)
+t<- skewness(diversity_data$resids_func_bc) %>%
+  divide_by(sqrt(6/length(diversity_data$resids_func_bc))) # t-value 
+1-pt(t,length(diversity_data$resids_func_bc)) #0.9196938
+# distribution of residuals are NOT significantly skewed
+
+#4 Bartlett test - p-value < 0.05 means data do not have equal variances across groups
+#Richness
+bartlett.test(diversity_data$resids_rich_bc~diversity_data$fYEAR)
+#Bartlett's K-squared = 58.753, df = 15, p-value = 4.127e-07
+bartlett.test(diversity_data$resids_rich_bc~diversity_data$fSTRAT)
+#Bartlett's K-squared = 68.924, df = 6, p-value = 6.794e-13
+# variances of residuals are significantly different among groups for both YEAR and STRAT
+
+#Shannon
+bartlett.test(diversity_data$resids_shan_bc~diversity_data$fYEAR)
+#Bartlett's K-squared = 43.224, df = 15, p-value = 0.0001453
+bartlett.test(diversity_data$resids_shan_bc~diversity_data$fSTRAT)
+#Bartlett's K-squared = 34.477, df = 6, p-value = 5.441e-06
+# variances of residuals are significantly different among groups for both YEAR and STRAT
+
+#Simpson
+bartlett.test(diversity_data$resids_simp_bc~diversity_data$fYEAR)
+#Bartlett's K-squared = 30.61, df = 15, p-value = 0.009901
+bartlett.test(diversity_data$resids_simp_bc~diversity_data$fSTRAT)
+#Bartlett's K-squared = 42.733, df = 6, p-value = 1.317e-07
+# variances of residuals are significantly different among groups for both YEAR and STRAT
+
+#Functional
+bartlett.test(diversity_data$resids_func_bc~diversity_data$fYEAR)
+#Bartlett's K-squared = 37.139, df = 15, p-value = 0.001208
+bartlett.test(diversity_data$resids_func_bc~diversity_data$fSTRAT)
+#Bartlett's K-squared = 39.931, df = 6, p-value = 4.7e-07
+# variances of residuals are significantly different among groups for both YEAR and STRAT
+
+#Data are not normally distributed (except shannon),skewed, and have unequal variances  proceed with non-parametric tests 
+
+```
+nonparametric Kruskal-Wallis test for significance by level of protection 
+
+```{r Kruskal-Wallis test for indices by protection}
+
+all_matrices_data = read_csv("diversity_data.csv")
+
+all_matrices_data$PROT = factor(all_matrices_data$PROT, levels=c("0","1"))
+levels(all_matrices_data$PROT)
+
+#richness 
+kruskal.test(all_matrices_data$richness~all_matrices_data$PROT)
+#Kruskal-Wallis chi-squared = 111.72, df = 1, p-value < 2.2e-16
+
+#Shannon 
+kruskal.test(all_matrices_data$shannon~all_matrices_data$PROT)
+#Kruskal-Wallis chi-squared = 33.185, df = 1, p-value = 8.377e-09
+
+#Simpson 
+kruskal.test(all_matrices_data$simpson~all_matrices_data$PROT)
+#Kruskal-Wallis chi-squared = 26.378, df = 1, p-value = 2.808e-07
+
+#Functional
+kruskal.test(all_matrices_data$func.div~all_matrices_data$PROT)
+#Kruskal-Wallis chi-squared = 26.496, df = 1, p-value = 2.641e-07
+
+## All indices are significantly different by level of protection
 
 ```
 
@@ -854,37 +1237,46 @@ dt_richnnes_strat = dt_rich_strat$res
 cldList(P.adj~Comparison,
         data = dt_richnnes_strat,
         threshold = 0.05)
+#FMLR = OFPR 
 
 #Shannon strata
 kruskal.test(all_matrices_data$shannon~all_matrices_data$STRAT)
-
+#Kruskal-Wallis chi-squared = 457.3, df = 6, p-value < 2.2e-16
 dt_shan_strat = dunnTest(shannon~STRAT, data=all_matrices_data)
 dt_shannon_strat = dt_shan_strat$res
 
 cldList(P.adj~Comparison,
         data = dt_shannon_strat,
         threshold = 0.05)
+#FDLR=FSLR
+#FDLR=INPR
+#FMLR=MCPR
 
 #Simpson 
 kruskal.test(all_matrices_data$simpson~all_matrices_data$STRAT)
 
 dt_simp_strat = dunnTest(simpson~STRAT, data=all_matrices_data)
 dt_simpson_strat = dt_simp_strat$res
-
+#Kruskal-Wallis chi-squared = 363.58, df = 6, p-value < 2.2e-16
 cldList(P.adj~Comparison,
         data = dt_simpson_strat,
         threshold = 0.05)
+#FDLR=INPR 
+#FMLR=FSLR 
+#HRRF=OFPR
 
 #Functional  
 kruskal.test(all_matrices_data$func.div~all_matrices_data$STRAT)
-
-
+#Kruskal-Wallis chi-squared = 706.22, df = 6, p-value < 2.2e-16
 dt_fd_strat = dunnTest(func.div~STRAT, data=all_matrices_data)
 dt_functional_strat = dt_fd_strat$res
 
 cldList(P.adj~Comparison,
         data = dt_functional_strat,
         threshold = 0.05)
+#FDLR=HRRF
+#FDLR=MCPR 
+#INPR=OFPR 
 
 DunnTest_strata = cbind(dt_richnnes_strat, dt_simpson_strat, dt_shannon_strat, dt_functional_strat)
 
@@ -944,4 +1336,68 @@ DunnTest_year = cbind(dt_richnnes_year, dt_simpson_year, dt_shannon_year, dt_fun
 
 write_csv(DunnTest_year, "DunnTest_year.csv") 
 
+```
+
+Diversity between SPA, SU, ER 
+
+"mapNumber" =  
+    0	Unprotected                 [unprotected]
+    1	Carysfort                   [Carysfort Sanctuary Preservation Area]
+    2	Elbow                       [Elbow Sanctuary Preservation Area]
+    3	Key_Largo_Dry_Rocks         [Key Largo Dry Rocks Sanctuary Preservation Area]
+    4	Grecian_Rocks               [Grecian Rocks Sanctuary Preservation Area]
+    5	French                      [French Reef Sanctuary Preservation Area]
+    6	Molasses                    [Molasses Reef Sanctuary Preservation Area]
+    7	Conch_Reef                  [Conch Reef Sanctuary Preservation Area]
+    8	Conch_RO                    [Conch Reef Research Only Area]
+    9	Davis                       [Davis Reef Sanctuary Preservation Area]
+    10 Hen_Chickens               [Hen and Chickens Sanctuary Preservation Area]
+    11 Cheeca_Rocks               [Cheeca Rocks Sanctuary Preservation Area]
+    12 Alligator                  [Alligator Reef Sanctuary Preservation Area]
+    13 Tennessee                  [Tennesse Reef Research Only Area]
+    14 Coffins_Patch              [Coffins Patch Sanctuary Preservation Area]
+    15 Sombrero                   [Sombrero Key Sanctuary Preservation Area]
+    16 Looe_Key                   [Looe Key Sanctuary Preservation Area]
+    17 Looe_RO                    [Looe Key Research Only Area]
+    18 Newfound_Harbor            [Newfound Harbor Key Sanctuary Preservation Area]
+    19 East_Sambo                 [Eastern Sambo Research Only Area]
+    20 West_Sambo                 [Western Sambo Ecological Reserve]
+    21 East_Dry_Rocks             [Eastern Dry Rocks Sanctuary Preservation Area]
+    22 Rock_Key                   [Rock Key Sanctuary Preservation Area]
+    23 Sand_Key                   [Sand Key Sanctuary Preservation Area]
+    24 North Ecological Reserve   [Tortugas North Ecological Reserve]
+    25 South Ecological Reserve   [Tortugas South Ecological Reserve]
+    26 Research Natural Area      [unprotected]
+    27 Not Protected              [unprotected]
+    28 Not Protected              [unprotected]
+
+```{r bargraph of diversity among different NTMR}
+
+all_matrices_data = read_csv("diversity_data.csv")
+
+diversity_ntmr = reshape2::melt(all_matrices_data, id.vars = c("MPA_NAME"),
+                                measure.vars=c("richness","shannon","simpson","func.div"))
+
+diversity_ntmr=plyr::ddply(diversity_ntmr, c("MPA_NAME", "variable"), summarize, 
+                           value.mean=mean(value),
+                           value.se=plotrix::std.error(value))
+levels(diversity_ntmr$variable)=c("Richness", "Shannon", "Simpson", "Functional")
+
+as.tibble(diversity_ntmr)
+
+diversity_ntmr_plot = diversity_ntmr %>%
+  ggplot(.,aes(x=MPA_NAME, y=value.mean,color=variable, group=variable, fill=variable))+ # 
+  geom_errorbar(aes(ymax=value.mean+value.se, ymin=value.mean-value.se), size=.6,width=0.3,position=position_dodge(.9))+
+  geom_bar(position="dodge",stat="identity", color="black",size=.3)+
+  labs(title="Biodiversity by Different Marine Zones", x="", y="Mean effective \nnumber of species (± SE)",color="",fill="")+
+  theme(
+    legend.position = "right",
+    legend.title=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    legend.text=element_text(size=12),
+    plot.title=element_text(hjust=0.5))
+
+ggsave(file="diversity_by_level_of_protection.pdf",diversity_ntmr_plot, width=10,height=4, path="plots")
+  
 ```
