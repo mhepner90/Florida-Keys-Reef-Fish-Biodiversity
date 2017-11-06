@@ -515,6 +515,6 @@ all_matrices_data = read_csv("diversity_data.csv")
       plot.title =element_text(hjust = 0.5),
       legend.text = element_text(size=12),
       legend.title =element_blank())
-ggsave(file="diversity_plot.pdf", width=7, height=7, path="big_csv/plots")
+ggsave(file="diversity_plot.pdf", width=7, height=7, path="plots")
 
-
+```
