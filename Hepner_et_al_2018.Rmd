@@ -197,23 +197,136 @@ Species-trait matrix
 
 ```{r species-trait matrix}
 
-if (!file.exists("functional_distance")){
+if (!file.exists("functional_distance_rds")){
 
   trait_matrix = read_csv('species_trait_matrix_316_spp_10_25_17.csv')
   
   trait_matrix = trait_matrix %>%
     as.tibble() %>%
     mutate(
-      SPECIES_CD = toupper(as.character(SPECIES_CD))) %>% 
-    arrange(SPECIES_CD)
+      SPECIES_CD = toupper(as.character(SPECIES_CD))) 
   
   species_108 = read_csv("species_5_percent_data.csv") #species that occured in >5% of the sample data 
   
-  species_trait_matrix = dplyr::semi_join(trait_matrix, species_108, by="SPECIES_CD")
+  species_trait_matrix = dplyr::semi_join(trait_matrix, species_108, by="SPECIES_CD") #108*12
   
   write_csv(species_trait_matrix, "species_trait_matrix.csv")
+  
+  trait_matrix = species_trait_matrix %>%
+    as.tibble() %>%
+    mutate(
+      SPECIES_CD = toupper(as.character(SPECIES_CD))) %>% 
+    arrange(SPECIES_CD)%>% 
+    select(SPECIES_CD, Maxlength, Trophic_level, Trophic_group, Water_column, Diel_activity, Substrate_type, Complexity, Gregariousness) %>% #348*9
+    group_by(
+      SPECIES_CD, Maxlength, Trophic_level, Trophic_group, Water_column, Diel_activity, Substrate_type, Complexity, Gregariousness) %>%
+    #summarize(n = n()) %>%
+    #select(-n) %>%
+    ungroup() %>%
+    mutate(
+      # ordinal traits
+      Complexity = ordered(Complexity, levels=c("Low","Medium","High")),
+      Gregariousness = ordered(Gregariousness, levels=c("1","2","3"))) %>%
+    as.data.frame()
+  
+  #Set species names as row.names and remove extra columns
+  rownames(trait_matrix)=trait_matrix$SPECIES_CD 
+  
+  #Calculate Gower distances. Variables have equal weight. 
+  traits.dist = gowdis(trait_matrix, ord="podani")
 
-}
+  #to account for sensitivity in clustering use multiple algorithms  (Mouchet et al., 2008) 
+  tree_methods = c("single","complete","average","mcquitty","ward.D") #average is best clustering method 
+  trees=lapply(tree_methods,  function(i) hclust(traits.dist, method=i))
+  par(mfrow=c(3,2))
+  for(i in 1:length(trees)) {plot(trees[[i]])} #plots the 5 different kinds of trees 
+  trees.ultra= lapply(trees,function(i) cl_ultrametric(as.hclust(i)))
+  
+  #Plot each tree
+  par(mfrow=c(3,2))
+  for (i in 1:length(trees.ultra)) {plot(trees.ultra[[i]])}  #plots the 5 different kinds of trees 
+  
+  #Build the consensus tree (Mouchet et al 2008 Oikos)  
+  ensemble.trees=cl_ensemble(list=trees) #list of clusterings 
+  class(ensemble.trees)
+  consensus.tree=cl_consensus(ensemble.trees) #synthesizes the information in the elements of a cluster ensemble into a single clustering 
+  par(mar=c(1,1,1,1))
+  plot(consensus.tree, horiz=T)
+  
+  #Calculate dissimilarity values for each tree using 2-norm (Merigot et al 2010 Ecology) to determine which tree best preserves orignial distances 
+  #spectral norm (2-norm) of the differences of the ultrametrics
+  all.trees=c(trees.ultra,consensus.tree[1])
+  names(all.trees)=c(tree_methods,"consensus")
+  (trees.dissim=lapply(all.trees,function(i) cl_dissimilarity(i,traits.dist,method="spectral"))) 
+  #Identify best tree and isolate
+  trees.dissim2=do.call(rbind,trees.dissim)
+  min.tree=which.min(trees.dissim2) #average 
+  names(all.trees)[min.tree]
+  func.dist=all.trees[names(all.trees)==names(all.trees)[min.tree]][[1]]
+  #Confirm lowest 2-norm value,  spectral norm (2-norm) of the differences if the ultrametrics 
+  cl_dissimilarity(func.dist,traits.dist,method="spectral") #Cross-dissimilarities using spectral ultrametric distance:   4.760895
+  
+  #Scale by the max value so that all values are between 0-1
+  func.dist=func.dist/max(func.dist)
+  saveRDS(func.dist, "functional_distance_rds")
+  
+  }else{ #read data 
+  func.dist = read_rds("functional_distance_rds")
+  } 
+
+trait_matrix_common = trait_matrix %>%
+    as.tibble() %>%
+    mutate(
+      Common_name = toupper(as.character(Common_name))) %>% 
+    arrange(Common_name)%>% 
+    select(Common_name, Maxlength, Trophic_level, Trophic_group, Water_column, Diel_activity, Substrate_type, Complexity, Gregariousness) %>% #348*9
+    group_by(
+      Common_name, Maxlength, Trophic_level, Trophic_group, Water_column, Diel_activity, Substrate_type, Complexity, Gregariousness) %>%
+    #summarize(n = n()) %>%
+    #select(-n) %>%
+    ungroup() %>%
+    mutate(
+      # ordinal traits
+      Complexity = ordered(Complexity, levels=c("Low","Medium","High")),
+      Gregariousness = ordered(Gregariousness, levels=c("1","2","3"))) %>%
+    as.data.frame()
+
+  #Set species names as row.names and remove extra columns
+  rownames(trait_matrix_common)=trait_matrix_common$Common_name 
+  
+  #Calculate Gower distances. Variables have equal weight. 
+  traits.dist.common = gowdis(trait_matrix_common, ord="podani")
+  
+  trees_common=lapply(tree_methods,  function(i) hclust(traits.dist, method=i))
+  
+  trees_ultra_common= lapply(trees_common,function(i) cl_ultrametric(as.hclust(i)))
+  
+  #Plot each tree
+  par(mfrow=c(3,2))
+  for (i in 1:length(trees_ultra_common)) {plot(trees_ultra_common[[i]])} #plots the 5 different kinds of trees 
+  
+  ensemble.trees=cl_ensemble(list=trees) #list of clusterings 
+  class(ensemble.trees)
+  consensus.tree=cl_consensus(ensemble.trees) #synthesizes the information in the elements of a cluster ensemble into a single clustering 
+  par(mar=c(1,1,1,1))
+  plot(consensus.tree, horiz=T)
+  
+  all.trees=c(trees_ultra_common,consensus.tree[1])
+  names(all.trees)=c(tree_methods,"consensus")
+  (trees.dissim=lapply(all.trees,function(i) cl_dissimilarity(i,traits.dist.common,method="spectral"))) 
+  
+  #Identify best tree and isolate
+  trees.dissim2=do.call(rbind,trees.dissim)
+  min.tree=which.min(trees.dissim2) #average 
+  names(all.trees)[min.tree]
+  func.dist.common=all.trees[names(all.trees)==names(all.trees)[min.tree]][[1]]
+  cl_dissimilarity(func.dist.common,traits.dist.common,method="spectral")
+  #Cross-dissimilarities using spectral ultrametric distance:
+
+  #Scale by the max value so that all values are between 0-1
+  func.dist.common=func.dist.common/max(func.dist.common)
+  saveRDS(func.dist.common, "functional_distance_common_rds")
+
 
 ```
 
@@ -223,11 +336,11 @@ Compute diversity indices
 
 diversity_indices = clean_data %>%  
     select(YEAR, PRIMARY_SAMPLE_UNIT,STRAT,PROT,SPECIES_CD,abundance) %>% #tibble: 192,780 x 6
-    group_by(YEAR, PRIMARY_SAMPLE_UNIT, STRAT, PROT) %>% 
+    group_by(YEAR, PRIMARY_SAMPLE_UNIT, STRAT, PROT) %>% #5,235 groups 
     nest(-YEAR) %>%
     mutate(
       data_wide = map(data, function(x) 
-        full_join(x, trait_matrix %>% select(SPECIES_CD), by='SPECIES_CD') %>%
+        full_join(x, species_trait_matrix %>% select(SPECIES_CD), by='SPECIES_CD') %>%
           mutate(abundance = ifelse(is.na(abundance), 0, abundance)) %>%
           spread(SPECIES_CD, abundance, fill =0)),
       data_wide = map(data, ~ spread(data=.x, SPECIES_CD, abundance, fill =0)), 
@@ -242,5 +355,85 @@ diversity_indices = clean_data %>%
         function(x) exp(diversity(x,  index = 'shannon')))) %>% 
     unnest(richness, simpson, shannon)
 
+diversity_indices = diversity_indices %>%
+  select(YEAR,PRIMARY_SAMPLE_UNIT,STRAT,PROT,richness,simpson,shannon) %>%
+  mutate(simpson = round(simpson,6),
+           shannon = round(shannon, 6))
+
+write_csv(diversity_indices, "diversity_indices.csv")
+
+func.dist = read_rds("functional_distance_rds")
+
+species_trait_matrix = read_csv("species_trait_matrix.csv") %>%
+  as.data.frame()
+
+#Set rownames on traits and remove other info
+  rownames(species_trait_matrix) <- species_trait_matrix$SPECIES_CD
+  species_trait_matrix <- species_trait_matrix[, -c(1:4)]
+  #Convert rownames to all caps
+  rownames(species_trait_matrix) <- toupper(rownames(species_trait_matrix))
+
+clean_data = read_csv("clean_data.csv")
+
+abundance = clean_data %>%
+  select(YEAR, PRIMARY_SAMPLE_UNIT,STRAT,PROT, SPECIES_CD, abundance) %>% 
+  group_by(YEAR, PRIMARY_SAMPLE_UNIT,STRAT,PROT, SPECIES_CD)
+
+#Cast abundance longways (species as columns)
+abundmat <- spread(abundance, SPECIES_CD, abundance, fill = 0)
+
+#Subset species whose names only appear in traits
+abundmat <- abundmat[colnames(abundmat) %in% rownames(species_trait_matrix)] 
+  #dim(abundmat) #5,235 x 108
+
+#Drop communities with no species (roughly 500 sites)
+  abundmat <- abundmat[!rowSums(abundmat) == 0,] 
+  #dim(abundmat) #5,235x108
+  abundmat <- abundmat[!rowSums(abundmat) == 1,]
+  #dim(abundmat) #5235x108
+  
+  #Calculate relative values for community matrix
+  rel.mat=abundmat/apply(abundmat,1,sum)
+  
+  #Compute species diversity
+  species.dist=matrix(1,ncol(abundmat),ncol(abundmat))-diag(rep(1,ncol(abundmat))) 
+  simpson=1/(1-apply(rel.mat,1,function(x) t(x) %*% species.dist %*% x))
+  
+  #Compute evenness (as in Jost 2010 Diversity)
+  evenness=log(species.div)/log(rowSums(abundmat>0))
+  
+  #functional diversity 
+  func.div=1/(1-apply(rel.mat,1, function(x) t(x) %*% as.matrix(func.dist) %*% x))
+  
+  #Bind all to the original dataframe (need to remove psu with 1 species detected)
+  list = cbind(simpson,func.div,evenness) %>%
+    as_tibble()%>%
+    mutate(simpson = round(simpson,6),
+           func.div = round(func.div, 6),
+           evenness = round(evenness, 6))
+               
+  diversity = full_join(diversity_indices, list, by="simpson") %>%
+    select(YEAR, PRIMARY_SAMPLE_UNIT, STRAT, PROT,
+           richness,shannon,simpson,func.div,evenness)%>%
+    group_by(YEAR, PRIMARY_SAMPLE_UNIT, STRAT,PROT) #5,235 groups
+  
+  write.csv(diversity, "diversity.csv")  #5247x9
+  
+  sample_data = read_csv("sample_data_all_years.csv") #5241x22
+  
+  RVC_data = read_rds("RVCdata_FK.rds")
+  survey_data = RVC_data$sample_data %>%
+    select(-SPECIES_CD, -SPECIES_NR, -REGION, -TIME_SEEN, -LEN, -NUM)%>%
+    group_by(YEAR,PRIMARY_SAMPLE_UNIT)%>% #MPA_NR, PROT,MONTH (5241),
+    summarize(
+      LAT_DEGREES = mean(LAT_DEGREES),
+      LON_DEGREES = mean(LON_DEGREES),
+      DEPTH = mean(DEPTH)) #dim 5,245X9
+  
+  all_data = inner_join(diversity,sample_data)
+  
 
 ```
+
+Plots 
+
