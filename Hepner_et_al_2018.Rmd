@@ -1190,6 +1190,7 @@ bartlett.test(diversity_data$resids_func_bc~diversity_data$fSTRAT)
 #Data are not normally distributed (except shannon),skewed, and have unequal variances  proceed with non-parametric tests 
 
 ```
+
 nonparametric Kruskal-Wallis test for significance by level of protection 
 
 ```{r Kruskal-Wallis test for indices by protection}
@@ -1214,6 +1215,71 @@ kruskal.test(all_matrices_data$simpson~all_matrices_data$PROT)
 #Functional
 kruskal.test(all_matrices_data$func.div~all_matrices_data$PROT)
 #Kruskal-Wallis chi-squared = 26.496, df = 1, p-value = 2.641e-07
+
+## All indices are significantly different by level of protection
+
+```
+
+Dunn's test between type of no take zones 
+```{r Dunn's test for indices by differnt types of zones}
+
+all_matrices_data = read_csv("diversity_data.csv")
+
+all_matrices_data$MPA_NAME = factor(all_matrices_data$MPA_NAME, levels=c("Not Protected",               "Sanctuary Preservation Area","Ecological Reserve","Special Use"))
+levels(all_matrices_data$MPA_NAME)
+
+#richness 
+kruskal.test(all_matrices_data$richness~all_matrices_data$MPA_NAME)
+#Kruskal-Wallis chi-squared = 164.29, df = 3, p-value < 2.2e-16
+dt_rich_mpa = dunnTest(richness~MPA_NAME, data=all_matrices_data)
+dt_richnnes_mpa = dt_rich_mpa$res
+
+cldList(P.adj~Comparison,
+        data = dt_richnnes_mpa,
+        threshold = 0.05)
+#ER = Not Protected
+#SPA = SU
+
+#Shannon 
+kruskal.test(all_matrices_data$shannon~all_matrices_data$MPA_NAME)
+#Kruskal-Wallis chi-squared = 37.113, df = 3, p-value = 4.355e-08
+dt_shan_mpa = dunnTest(shannon~MPA_NAME, data=all_matrices_data)
+dt_shannon_mpa = dt_shan_mpa$res
+
+cldList(P.adj~Comparison,
+        data = dt_shannon_mpa,
+        threshold = 0.05)
+#ER=Not Protected
+#ER=SU
+#SPA=SU 
+
+#Simpson 
+kruskal.test(all_matrices_data$simpson~all_matrices_data$MPA_NAME)
+#Kruskal-Wallis chi-squared = 27.878, df = 3, p-value = 3.852e-06
+dt_simp_mpa = dunnTest(simpson~MPA_NAME, data=all_matrices_data)
+dt_simpson_mpa = dt_simp_mpa$res
+
+cldList(P.adj~Comparison,
+        data = dt_simpson_mpa,
+        threshold = 0.05)
+#ER=Not Protected
+#ER=SU
+#ER=SPA 
+#SPA=SU 
+
+#Functional
+kruskal.test(all_matrices_data$func.div~all_matrices_data$MPA_NAME)
+#Kruskal-Wallis chi-squared = 32.542, df = 3, p-value = 4.022e-07
+dt_fd_mpa = dunnTest(func.div~MPA_NAME, data=all_matrices_data)
+dt_functional_mpa = dt_fd_mpa$res
+
+cldList(P.adj~Comparison,
+        data = dt_functional_mpa,
+        threshold = 0.05)
+#ER=SPA
+#ER=SU
+#SU=SPA
+#Not protected not significanyly similar to anything 
 
 ## All indices are significantly different by level of protection
 
