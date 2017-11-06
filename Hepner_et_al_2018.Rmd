@@ -42,92 +42,96 @@ Fetch abundance data for each primary sampling unit (PSU) from 1999 - 2016
 
 ```{r fetch abundance data}
 
-fk_data <- getRvcData(1999:2016, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
+if(!file.exists("psu_fk_abun.csv")){
+  
+  fk_data <- getRvcData(1999:2016, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
+  
+  spp_list<- fk_data$taxonomic_data$COMNAME #399 species 
+  write_csv(spp_list, 'spp_list.csv')
+  
+  fk1999<- getRvcData(1999, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
+  psu_abunfk1999 <- getPSUAbundance(fk1999, spp_list, merge_protected = F)
+  write_csv(psu_abunfk1999, 'psu_abunfk1999.csv') #1999
+  
+  fk2000<- getRvcData(2000, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
+  psu_abunfk2000 <- getPSUAbundance(fk2000, spp_list, merge_protected = F)  
+  write_csv(psu_abunfk2000, 'psu_abunfk2000.csv') #2000
 
-spp_list<- fk_data$taxonomic_data$COMNAME #399 species 
-write_csv(spp_list, 'spp_list.csv')
+  fk2001<- getRvcData(2001, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
+  psu_abunfk2001 <- getPSUAbundance(fk2001, spp_list, merge_protected = F) 
+  write_csv(psu_abunfk2001, 'psu_abunfk2001.csv') #2001
+  
+  fk2002<- getRvcData(2002, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
+  psu_abunfk2002 <- getPSUAbundance(fk2002, spp_list, merge_protected = F) 
+  write_csv(psu_abunfk2002, 'psu_abunfk2002.csv') #2002
+  
+  fk2003<- getRvcData(2003, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
+  psu_abunfk2003 <- getPSUAbundance(fk2003, spp_list, merge_protected = F) 
+  write_csv(psu_abunfk2003, 'psu_abunfk2003.csv') #2003
+  
+  fk2004<- getRvcData(2004, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
+  psu_abunfk2004 <- getPSUAbundance(fk2004, spp_list, merge_protected = F)
+  write_csv(psu_abunfk2004, 'psu_abunfk2004.csv') #2004
+  
+  fk2005<- getRvcData(2005, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/') 
+  psu_abunfk2005 <- getPSUAbundance(fk2005, spp_list, merge_protected = F) 
+  write_csv(psu_abunfk2005, 'psu_abunfk2005.csv') #2005
+  
+  fk2006<- getRvcData(2006, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/') 
+  psu_abunfk2006 <- getPSUAbundance(fk2006, spp_list, merge_protected = F) 
+  write_csv(psu_abunfk2006, 'psu_abunfk2006.csv') #2006
+  
+  fk2007<- getRvcData(2007, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/') psu_abunfk2007 <- getPSUAbundance(fk2007, spp_list, merge_protected = F) 
+  write_csv(psu_abunfk2007, 'psu_abunfk2007.csv') #2007
+  
+  fk2008<- getRvcData(2008, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/') psu_abunfk2008 <- getPSUAbundance(fk2008, spp_list, merge_protected = F) 
+  write_csv(psu_abunfk2008, 'psu_abunfk2008.csv') #2008
+  
+  fk2009<- getRvcData(2009, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
+  psu_abunfk2009 <- getPSUAbundance(fk2009, spp_list, merge_protected = F) 
+  write_csv(psu_abunfk2009, 'abundance_psu/FK/psu_abunfk2009.csv') #2009 
+  
+  fk2010<- getRvcData(2010, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
+  psu_abunfk2010 <- getPSUAbundance(fk2010, spp_list, merge_protected = F) 
+  write_csv(psu_abunfk2010, 'abundance_psu/FK/psu_abunfk2010.csv') #2010
+  
+  fk2011<- getRvcData(2011, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
+  psu_abunfk2011 <- getPSUAbundance(fk2011, spp_list, merge_protected = F) 
+  write_csv(psu_abunfk2011, 'big_csv/abundance_psu/FK/psu_abunfk2011.csv') #2011
+  
+  fk2012<- getRvcData(2012, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
+  psu_abunfk2012 <- getPSUAbundance(fk2012, spp_list, merge_protected = F)
+  write_csv(psu_abunfk2012, 'abundance_psu/FK/psu_abunfk2012.csv') #2012
+  
+  fk2014<- getRvcData(2014, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/') 
+  psu_abunfk2014 <- getPSUAbundance(fk2014, spp_list, merge_protected = F) 
+  write_csv(psu_abunfk2014, 'abundance_psu/FK/psu_abunfk2014.csv') #2014
+  
+  fk2016<- getRvcData(2016, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
+  psu_abunfk2016 <- getPSUAbundance(fk2016, spp_list, merge_protected = F) 
+  write_csv(psu_abunfk2016, 'psu_abunfk2016.csv') #2016
 
-fk1999<- getRvcData(1999, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
-psu_abunfk1999 <- getPSUAbundance(fk1999, spp_list, merge_protected = F)
-write_csv(psu_abunfk1999, 'psu_abunfk1999.csv') #1999
+#Bind PSU abundance data from 1999 - 2016 in the Florida Keys into one csv file
 
-fk2000<- getRvcData(2000, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
-psu_abunfk2000 <- getPSUAbundance(fk2000, spp_list, merge_protected = F)  
-write_csv(psu_abunfk2000, 'psu_abunfk2000.csv') #2000
-
-fk2001<- getRvcData(2001, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
-psu_abunfk2001 <- getPSUAbundance(fk2001, spp_list, merge_protected = F) 
-write_csv(psu_abunfk2001, 'psu_abunfk2001.csv') #2001
-
-fk2002<- getRvcData(2002, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
-psu_abunfk2002 <- getPSUAbundance(fk2002, spp_list, merge_protected = F) 
-write_csv(psu_abunfk2002, 'psu_abunfk2002.csv') #2002
-
-fk2003<- getRvcData(2003, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
-psu_abunfk2003 <- getPSUAbundance(fk2003, spp_list, merge_protected = F) 
-write_csv(psu_abunfk2003, 'psu_abunfk2003.csv') #2003
-
-fk2004<- getRvcData(2004, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
-psu_abunfk2004 <- getPSUAbundance(fk2004, spp_list, merge_protected = F)
-write_csv(psu_abunfk2004, 'psu_abunfk2004.csv') #2004
-
-fk2005<- getRvcData(2005, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/') 
-psu_abunfk2005 <- getPSUAbundance(fk2005, spp_list, merge_protected = F) 
-write_csv(psu_abunfk2005, 'psu_abunfk2005.csv') #2005
-
-fk2006<- getRvcData(2006, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/') 
-psu_abunfk2006 <- getPSUAbundance(fk2006, spp_list, merge_protected = F) 
-write_csv(psu_abunfk2006, 'psu_abunfk2006.csv') #2006
-
-fk2007<- getRvcData(2007, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/') psu_abunfk2007 <- getPSUAbundance(fk2007, spp_list, merge_protected = F) 
-write_csv(psu_abunfk2007, 'psu_abunfk2007.csv') #2007
-
-fk2008<- getRvcData(2008, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/') psu_abunfk2008 <- getPSUAbundance(fk2008, spp_list, merge_protected = F) 
-write_csv(psu_abunfk2008, 'psu_abunfk2008.csv') #2008
-
-fk2009<- getRvcData(2009, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
-psu_abunfk2009 <- getPSUAbundance(fk2009, spp_list, merge_protected = F) 
-write_csv(psu_abunfk2009, 'abundance_psu/FK/psu_abunfk2009.csv') #2009 
-
-fk2010<- getRvcData(2010, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
-psu_abunfk2010 <- getPSUAbundance(fk2010, spp_list, merge_protected = F) 
-write_csv(psu_abunfk2010, 'abundance_psu/FK/psu_abunfk2010.csv') #2010
-
-fk2011<- getRvcData(2011, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
-psu_abunfk2011 <- getPSUAbundance(fk2011, spp_list, merge_protected = F) 
-write_csv(psu_abunfk2011, 'big_csv/abundance_psu/FK/psu_abunfk2011.csv') #2011
-
-fk2012<- getRvcData(2012, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
-psu_abunfk2012 <- getPSUAbundance(fk2012, spp_list, merge_protected = F)
-write_csv(psu_abunfk2012, 'abundance_psu/FK/psu_abunfk2012.csv') #2012
-
-fk2014<- getRvcData(2014, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/') 
-psu_abunfk2014 <- getPSUAbundance(fk2014, spp_list, merge_protected = F) 
-write_csv(psu_abunfk2014, 'abundance_psu/FK/psu_abunfk2014.csv') #2014
-
-fk2016<- getRvcData(2016, "FLA KEYS", server = 'https://www.sefsc.noaa.gov/rvc_analysis20/')
-psu_abunfk2016 <- getPSUAbundance(fk2016, spp_list, merge_protected = F) 
-write_csv(psu_abunfk2016, 'psu_abunfk2016.csv') #2016
-
-```
-
-Bind PSU abundance data from 1999 - 2016 in the Florida Keys into one csv file
-
-```{r bind psu abundance data}
-##FK abundance psu 
-cat("bind all csv's\n") #concatenate and print - character string naming the file to print to
+  ##FK abundance psu 
+  cat("bind all csv's\n") #concatenate and print - character string naming the file to print to
   d = data_frame()
-    for (f in list.files('big_csv/abundance_psu/FK', pattern="*.csv", full.names=T)){
-      cat(' ', f,'\n')
-      d_f = read_csv(
-        f, #path to a file 
-        progress=F, #progress: Display a progress bar
-        trim_ws=T, #trim_ws: leading and trailing whitespace are trimmed 
-        col_types = cols(
-          protected_status = col_character()))  #column specification - must contain one column specification for each column
-      d = bind_rows(d, d_f)
-    } 
-write_csv(d, 'big_csv/abundance_psu/psu_fk_abun.csv')
+  for (f in list.files('big_csv/abundance_psu/FK', pattern="*.csv", full.names=T)){
+    cat(' ', f,'\n')
+    d_f = read_csv(
+      f, #path to a file 
+      progress=F, #progress: Display a progress bar
+      trim_ws=T, #trim_ws: leading and trailing whitespace are trimmed 
+      col_types = cols(
+        protected_status = col_character()))  #column specification - must contain one column specification for each column
+    d = bind_rows(d, d_f)
+  } 
+  write_csv(d, 'psu_fk_abun.csv') 
+  }else{
+  psu_abundance = read_csv("psu_fk_abun.csv",
+                           col_types = cols(protected_status = col_character()))
+}
+
 ```
 
 Clean data
@@ -137,46 +141,55 @@ Clean data
 if(!file.exists("clean_data.csv")){
   #read in data 
   psu_abundance <- read_csv("psu_fk_abun.csv",
-                          col_types = cols(protected_status = col_character()))
+                            col_types = cols(protected_status = col_character()))
   #dim(psu_fk_abun) #3,643,306 x 10
-
+  
   #remove species not identified in species level 
-  psu_abundance = psu_abundance %>%
+  clean_data = psu_abundance %>%
     filter(!stringr::str_detect(SPECIES_CD, 'SPE\\.$'))%>% #348 species
     filter(stringr::str_detect(protected_status, 'all'))%>% #dim(psu_abundance) 1,689,982x10
     filter(!abundance == "0")
   #dim(psu_abundance) 203,466     10
   
   #remove species that occured in less than 5% of PSU's (total of 5,234 sampling events between 1999-2016). Species must have occured at least 262 sampling events.
-  remove_rare_sp = psu_abundance %>%
+  remove_rare_sp = clean_data %>%
     mutate(presence_absence = 
              ifelse(abundance == 0, "0",
                     ifelse(abundance >0, "1", "IDK")))%>%
     group_by(SPECIES_CD)%>%
     summarise(
-      rare_sp = sum(as.numeric(presence_absence)))%>%
-    arrange(rare_sp)%>%
-    filter(rare_sp > 261) #108 species 
+      occurance = sum(as.numeric(presence_absence)))%>%
+    arrange(occurance)%>%
+    filter(occurance > 261) #108 species 
   
-  write_csv(remove_rare_sp, "species_5_percent_data.csv")
-   
-    #remove species from abundance data didn't occur 5% of the sampling events 
-  clean_data = semi_join(psu_abundance, remove_rare_sp, by="SPECIES_CD") 
-  #dim(clean_data) 192,916 x 10
+  if(!file.exists('RVCdata_FK.rds')){
+    RVCdata_FK = getRvcData(1999:2016, "FLA KEYS", server = "https://www.sefsc.noaa.gov/rvc_analysis20/")
+  }else{
+    RVCdata_FK = read_rds("RVCdata_FK.rds")
+  }
   
-    #remove PSU with only 1 species [2006,602U INPR] [2016,  1010U, INPR] and remove 2001 PSU 222U HRRF with abundance 5X greater than normal (50,114 species)
+  taxonimic_data = RVCdata_FK$taxonomic_data
+  
+  species_occured_5_percent_data = left_join(remove_rare_sp,taxonimic_data, by="SPECIES_CD")%>%
+    select(SPECIES_CD,FAMILY,SCINAME,COMNAME) #108 x 4 
+  
+  #remove species from abundance data didn't occur 5% of the sampling events 
+  clean_data = left_join(clean_data, species_occured_5_percent_data, by="SPECIES_CD") 
+  #dim(clean_data) 192,780x13 (108 species)
+  
+  #remove PSU with only 1 species [2006,602U INPR] [2016,  1010U, INPR] and remove 2001 PSU 222U HRRF with abundance 5X greater than normal 
   clean_data = clean_data[!(clean_data$YEAR == "2006" & 
-                                  clean_data$PRIMARY_SAMPLE_UNIT == "602U" | #only 1 species
-                                  clean_data$YEAR == "2016" & 
-                                  clean_data$PRIMARY_SAMPLE_UNIT == "1010U"| #only 1 species 
-                                  clean_data$YEAR == "2002" &
-                                  clean_data$PRIMARY_SAMPLE_UNIT =="472U"  | #one large school sp.
-                                  clean_data$YEAR == "2003" &
-                                  clean_data$PRIMARY_SAMPLE_UNIT =="119U"  | #one large school sp. 
-                                  clean_data$YEAR == "2004" &
-                                  clean_data$PRIMARY_SAMPLE_UNIT =="403U"  | #one large school sp.
-                                  clean_data$YEAR == "2001" & 
-                                  clean_data$PRIMARY_SAMPLE_UNIT =="222U"),]
+                              clean_data$PRIMARY_SAMPLE_UNIT == "602U" | #only 1 species
+                              clean_data$YEAR == "2016" & 
+                              clean_data$PRIMARY_SAMPLE_UNIT == "1010U"| #only 1 species 
+                              clean_data$YEAR == "2002" &
+                              clean_data$PRIMARY_SAMPLE_UNIT =="472U"  | #one large school sp.
+                              clean_data$YEAR == "2003" &
+                              clean_data$PRIMARY_SAMPLE_UNIT =="119U"  | #one large school sp. 
+                              clean_data$YEAR == "2004" &
+                              clean_data$PRIMARY_SAMPLE_UNIT =="403U"  | #one large school sp.
+                              clean_data$YEAR == "2001" & 
+                              clean_data$PRIMARY_SAMPLE_UNIT =="222U"),]
   #INPR_2002_472U - HYP HARR abundance 9999.5 
   #OFPR_2003_119U - DEC PUNC abundance 5000.0
   #MCPR_2004_403U - HYP HARR abundance 5000.0
@@ -184,12 +197,11 @@ if(!file.exists("clean_data.csv")){
   #dim(clean_data) 192,780 x 10
   
   write_csv(clean_data, "clean_data.csv")
-  saveRDS(clean_data, "clean_data_rds")
   
-  }else{
-    clean_data = read_csv("clean_data.csv", 
-                          col_types = cols(protected_status = col_character()))
-    }
+}else{
+  clean_data = read_csv("clean_data.csv", 
+                        col_types = cols(protected_status = col_character()))
+}
 
 ```
 
@@ -198,7 +210,7 @@ Species-trait matrix
 ```{r species-trait matrix}
 
 if (!file.exists("functional_distance_rds")){
-
+  
   trait_matrix = read_csv('species_trait_matrix_316_spp_10_25_17.csv')
   
   trait_matrix = trait_matrix %>%
@@ -234,7 +246,7 @@ if (!file.exists("functional_distance_rds")){
   
   #Calculate Gower distances. Variables have equal weight. 
   traits.dist = gowdis(trait_matrix, ord="podani")
-
+  
   #to account for sensitivity in clustering use multiple algorithms  (Mouchet et al., 2008) 
   tree_methods = c("single","complete","average","mcquitty","ward.D") #average is best clustering method 
   trees=lapply(tree_methods,  function(i) hclust(traits.dist, method=i))
@@ -269,12 +281,13 @@ if (!file.exists("functional_distance_rds")){
   #Scale by the max value so that all values are between 0-1
   func.dist=func.dist/max(func.dist)
   saveRDS(func.dist, "functional_distance_rds")
-  
-  }else{ #read data 
+}else{ #read data 
   func.dist = read_rds("functional_distance_rds")
-  } 
+} 
 
-trait_matrix_common = trait_matrix %>%
+if(!file.exists("functional_distance_common_rds")){
+  
+  trait_matrix_common = trait_matrix %>%
     as.tibble() %>%
     mutate(
       Common_name = toupper(as.character(Common_name))) %>% 
@@ -290,7 +303,7 @@ trait_matrix_common = trait_matrix %>%
       Complexity = ordered(Complexity, levels=c("Low","Medium","High")),
       Gregariousness = ordered(Gregariousness, levels=c("1","2","3"))) %>%
     as.data.frame()
-
+  
   #Set species names as row.names and remove extra columns
   rownames(trait_matrix_common)=trait_matrix_common$Common_name 
   
@@ -313,7 +326,8 @@ trait_matrix_common = trait_matrix %>%
   
   all.trees=c(trees_ultra_common,consensus.tree[1])
   names(all.trees)=c(tree_methods,"consensus")
-  (trees.dissim=lapply(all.trees,function(i) cl_dissimilarity(i,traits.dist.common,method="spectral"))) 
+  (trees.dissim=lapply(all.trees,function(i)
+    cl_dissimilarity(i,traits.dist.common,method="spectral"))) 
   
   #Identify best tree and isolate
   trees.dissim2=do.call(rbind,trees.dissim)
@@ -322,10 +336,13 @@ trait_matrix_common = trait_matrix %>%
   func.dist.common=all.trees[names(all.trees)==names(all.trees)[min.tree]][[1]]
   cl_dissimilarity(func.dist.common,traits.dist.common,method="spectral")
   #Cross-dissimilarities using spectral ultrametric distance:
-
+  
   #Scale by the max value so that all values are between 0-1
   func.dist.common=func.dist.common/max(func.dist.common)
   saveRDS(func.dist.common, "functional_distance_common_rds")
+}else{
+  func.dist.common = readRDS("functional_distance_common_rds")
+}
 
 
 ```
@@ -334,7 +351,14 @@ Compute diversity indices
 
 ```{r biodiversity}
 
-diversity_indices = clean_data %>%  
+if(!file.exists('diversity_data.csv')){
+  
+  clean_data = read_csv("clean_data.csv")
+  
+  species_trait_matrix = read_csv("species_trait_matrix.csv") %>%
+    as.data.frame()
+  
+  diversity_indices = clean_data %>%  
     select(YEAR, PRIMARY_SAMPLE_UNIT,STRAT,PROT,SPECIES_CD,abundance) %>% #tibble: 192,780 x 6
     group_by(YEAR, PRIMARY_SAMPLE_UNIT, STRAT, PROT) %>% #5,235 groups 
     nest(-YEAR) %>%
@@ -354,43 +378,33 @@ diversity_indices = clean_data %>%
         data_wide, 
         function(x) exp(diversity(x,  index = 'shannon')))) %>% 
     unnest(richness, simpson, shannon)
-
-diversity_indices = diversity_indices %>%
-  select(YEAR,PRIMARY_SAMPLE_UNIT,STRAT,PROT,richness,simpson,shannon) %>%
-  mutate(simpson = round(simpson,6),
-           shannon = round(shannon, 6))
-
-write_csv(diversity_indices, "diversity_indices.csv")
-
-func.dist = read_rds("functional_distance_rds")
-
-species_trait_matrix = read_csv("species_trait_matrix.csv") %>%
-  as.data.frame()
-
-#Set rownames on traits and remove other info
+  
+  diversity_indices = diversity_indices %>%
+    select(YEAR,PRIMARY_SAMPLE_UNIT,STRAT,PROT,richness,simpson,shannon) %>%
+    mutate(simpson = round(simpson,8),
+           shannon = round(shannon,8))
+  #dim(diversity_indices) 5235x7
+  
+  func.dist = read_rds("functional_distance_rds")
+  
+  #Set rownames on traits and remove other info
   rownames(species_trait_matrix) <- species_trait_matrix$SPECIES_CD
   species_trait_matrix <- species_trait_matrix[, -c(1:4)]
   #Convert rownames to all caps
   rownames(species_trait_matrix) <- toupper(rownames(species_trait_matrix))
-
-clean_data = read_csv("clean_data.csv")
-
-abundance = clean_data %>%
-  select(YEAR, PRIMARY_SAMPLE_UNIT,STRAT,PROT, SPECIES_CD, abundance) %>% 
-  group_by(YEAR, PRIMARY_SAMPLE_UNIT,STRAT,PROT, SPECIES_CD)
-
-#Cast abundance longways (species as columns)
-abundmat <- spread(abundance, SPECIES_CD, abundance, fill = 0)
-
-#Subset species whose names only appear in traits
-abundmat <- abundmat[colnames(abundmat) %in% rownames(species_trait_matrix)] 
+  
+  abundance = clean_data %>%
+    select(YEAR, PRIMARY_SAMPLE_UNIT,STRAT,PROT, SPECIES_CD, abundance) %>% 
+    group_by(YEAR, PRIMARY_SAMPLE_UNIT,STRAT,PROT)
+  #dim(abundance) 192780x6 : 5235 groups 
+  
+  #Cast abundance longways (species as columns)
+  abundmat <- spread(abundance, SPECIES_CD, abundance, fill = 0) 
+  #dim(abundmat)5,235*112
+  
+  #Subset species whose names only appear in traits
+  abundmat <- abundmat[colnames(abundmat) %in% rownames(species_trait_matrix)] 
   #dim(abundmat) #5,235 x 108
-
-#Drop communities with no species (roughly 500 sites)
-  abundmat <- abundmat[!rowSums(abundmat) == 0,] 
-  #dim(abundmat) #5,235x108
-  abundmat <- abundmat[!rowSums(abundmat) == 1,]
-  #dim(abundmat) #5235x108
   
   #Calculate relative values for community matrix
   rel.mat=abundmat/apply(abundmat,1,sum)
@@ -400,39 +414,59 @@ abundmat <- abundmat[colnames(abundmat) %in% rownames(species_trait_matrix)]
   simpson=1/(1-apply(rel.mat,1,function(x) t(x) %*% species.dist %*% x))
   
   #Compute evenness (as in Jost 2010 Diversity)
-  evenness=log(species.div)/log(rowSums(abundmat>0))
+  evenness=log(simpson)/log(rowSums(abundmat>0))
   
   #functional diversity 
   func.div=1/(1-apply(rel.mat,1, function(x) t(x) %*% as.matrix(func.dist) %*% x))
   
-  #Bind all to the original dataframe (need to remove psu with 1 species detected)
+  #Bind all to the original dataframe 
   list = cbind(simpson,func.div,evenness) %>%
     as_tibble()%>%
-    mutate(simpson = round(simpson,6),
-           func.div = round(func.div, 6),
-           evenness = round(evenness, 6))
-               
-  diversity = full_join(diversity_indices, list, by="simpson") %>%
-    select(YEAR, PRIMARY_SAMPLE_UNIT, STRAT, PROT,
-           richness,shannon,simpson,func.div,evenness)%>%
-    group_by(YEAR, PRIMARY_SAMPLE_UNIT, STRAT,PROT) #5,235 groups
+    mutate(simpson = round(simpson,8),
+           func.div = round(func.div, 8),
+           evenness = round(evenness, 8))
+  #dim(list) 5235x3
   
-  write.csv(diversity, "diversity.csv")  #5247x9
-  
-  sample_data = read_csv("sample_data_all_years.csv") #5241x22
+  diversity = left_join(diversity_indices, list, by="simpson") %>%
+    group_by(YEAR, PRIMARY_SAMPLE_UNIT) %>% #5,235 groups
+    summarise(
+      richness = first(richness),
+      simpson = first(simpson),
+      shannon = first(shannon),
+      func.div = first(func.div),
+      evenness = first(evenness))
   
   RVC_data = read_rds("RVCdata_FK.rds")
-  survey_data = RVC_data$sample_data %>%
+  sample_data = RVCdata_FK$sample_data %>%
+    as.tibble() %>%
     select(-SPECIES_CD, -SPECIES_NR, -REGION, -TIME_SEEN, -LEN, -NUM)%>%
-    group_by(YEAR,PRIMARY_SAMPLE_UNIT)%>% #MPA_NR, PROT,MONTH (5241),
+    group_by(YEAR,PRIMARY_SAMPLE_UNIT, PROT, MPA_NR)%>% 
     summarize(
       LAT_DEGREES = mean(LAT_DEGREES),
       LON_DEGREES = mean(LON_DEGREES),
-      DEPTH = mean(DEPTH)) #dim 5,245X9
+      DEPTH = mean(DEPTH),
+      MONTH = mean(MONTH))
+  #dim 5,241X8
+  
+  sample_data = sample_data[!(sample_data$YEAR == "2006" & 
+                              sample_data$PRIMARY_SAMPLE_UNIT == "602U" | #only 1 species
+                              sample_data$YEAR == "2016" & 
+                              sample_data$PRIMARY_SAMPLE_UNIT == "1010U"| #only 1 species 
+                              sample_data$YEAR == "2002" &
+                              sample_data$PRIMARY_SAMPLE_UNIT =="472U"  | #one large school sp.
+                              sample_data$YEAR == "2003" &
+                              sample_data$PRIMARY_SAMPLE_UNIT =="119U"  | #one large school sp. 
+                              sample_data$YEAR == "2004" &
+                              sample_data$PRIMARY_SAMPLE_UNIT =="403U"  | #one large school sp.
+                              sample_data$YEAR == "2001" & 
+                              sample_data$PRIMARY_SAMPLE_UNIT =="222U"),]
+  #dim(sample_data) 5235x8
   
   all_data = inner_join(diversity,sample_data)
   
-
+  write_csv(all_data, "diversity_data.csv")
+  }
+  
 ```
 
 Plots 
