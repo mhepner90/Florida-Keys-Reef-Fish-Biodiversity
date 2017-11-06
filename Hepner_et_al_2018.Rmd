@@ -14,6 +14,7 @@ library(d3treeR) #d3treeR interactive traitmap
 library(devtools) #install_github
 library(FD) #gowdis
 library(fpc) #pamk
+library(FSA) #dunnTest
 library(ggplot2) #ggplot
 library(grid)
 library(gridExtra) #grid.arrange
@@ -23,6 +24,7 @@ library(mgcv) #gam
 library(parallel) #clusterEvalQ,clusterExport,detectCores,makeCluster,parLapply
 library(plotrix) #std.error
 library(purrr) #map
+library(rcompanion) #cldList
 library(readr) #saveRDS, read_rds, readRDS 
 library(reshape2) #melt
 #devtools::install_github('jeremiaheb/rvc')
@@ -669,5 +671,275 @@ g_prot <- grid.arrange(rich_prot,shan_prot,simp_prot,func_prot)
 
 ggsave(file="all_indices_by_year_and_protection.pdf", g_prot, width=7, height=10, path="plots")
 
+```
+
+nonparametric Kruskal-Wallis test for significance by level of protection 
+
+```{r Kruskal-Wallis test for indices by protection}
+
+all_matrices_data = read_csv("diversity_data.csv")
+
+all_matrices_data$PROT = factor(all_matrices_data$PROT, levels=c("0","1"))
+levels(all_matrices_data$PROT)
+
+#richness 
+kruskal.test(all_matrices_data$richness~all_matrices_data$PROT)
+#Kruskal-Wallis chi-squared = 111.72, df = 1, p-value < 2.2e-16
+
+#Shannon 
+kruskal.test(all_matrices_data$shannon~all_matrices_data$PROT)
+#Kruskal-Wallis chi-squared = 33.185, df = 1, p-value = 8.377e-09
+
+#Simpson 
+kruskal.test(all_matrices_data$simpson~all_matrices_data$PROT)
+#Kruskal-Wallis chi-squared = 26.378, df = 1, p-value = 2.808e-07
+
+#Functional
+kruskal.test(all_matrices_data$func.div~all_matrices_data$PROT)
+#Kruskal-Wallis chi-squared = 26.496, df = 1, p-value = 2.641e-07
+
+## All indices are significantly different by level of protection
+
+```
+
+Plot diversity indices by grouped strata 
+
+```{r diversity by year and grouped strata}
+
+all_matrices_data = read_csv("diversity_data.csv")
+
+matrices_strat_grouped = all_matrices_data %>% 
+    mutate(
+      STRAT_GROUPED = 
+      ifelse(grepl("FMLR|FSLR|FDLR", STRAT), 'LINEAR_REEF', 
+             ifelse(grepl("OFPR|MCPR|INPR", STRAT), 'PATCH_REEF',
+                    ifelse(grepl('HRRF', STRAT), 'HIGH_RELIEF', "IDK")))) %>%
+    group_by(YEAR, STRAT_GROUPED) %>% 
+    summarize(
+      richness_mean = mean(richness),
+      richness_n = length(richness),
+      richness_sd = sd(richness),
+      richness_se = richness_sd / sqrt(richness_n),
+      richness_min = min(richness),
+      richness_max = max(richness),
+      shannon_mean = mean(shannon),
+      shannon_n = length(shannon),
+      shannon_sd = sd(shannon),
+      shannon_se = shannon_sd / sqrt(shannon_n),
+      shannon_min = min(shannon),
+      shannon_max = max(shannon),
+      simpson_mean = mean(simpson),
+      simpson_n = length(simpson),
+      simpson_sd = sd(simpson),
+      simpson_se = simpson_sd / sqrt(simpson_n),
+      simpson_min = min(simpson),
+      simpson_max = max(simpson),
+      func.div_mean = mean(func.div),
+      func.div_n = length(func.div),
+      func.div_sd = sd(func.div),
+      func.div_se = func.div_sd / sqrt(func.div_n),
+      func.div_min = min(func.div),
+      func.div_max = max(func.div),
+      evenness_mean = mean(evenness),
+      evenness_n = length(evenness),
+      evenness_sd = sd(evenness),
+      evenness_se = evenness_sd / sqrt(evenness_n),
+      evenness_min = min(evenness),
+      evenness_max = max(evenness))
+
+#richness
+rich_gs= ggplot(matrices_strat_grouped,aes(x=YEAR,y=richness_mean, colour=STRAT_GROUPED, group=STRAT_GROUPED))+ #shape=STRAT
+  geom_line(aes(group=STRAT_GROUPED),lwd=1) +
+  geom_point(size=3) +
+ geom_errorbar(aes(ymin=richness_mean-richness_se, ymax=richness_mean+richness_se), width=.1)+
+  labs(title= "A) Richness", x="Year", y="Mean ENS", colour = "Strata")+
+  scale_colour_manual(labels=c("High reef", "Linear reef", "Patch reef"), values= c("red", "green", "blue"))+
+  scale_x_continuous(limits = c(1999, 2016), breaks = c(2000,2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016), labels=c("2000","","2004","","2008","","2012","","2016"))+
+  theme_bw()+
+  theme(
+      legend.position="none",
+      panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank(),
+      axis.title.x=element_text(size=12),
+      axis.title.y=element_text(size=12),
+      title=element_text(size=12))
+ggsave(file="richness_by_year_and_strata_grouped.pdf", path="plots")
+
+#shannon
+shan_gs= ggplot(matrices_strat_grouped,aes(x=YEAR,y=shannon_mean, colour=STRAT_GROUPED, group=STRAT_GROUPED))+ #shape=STRAT
+  geom_line(aes(group=STRAT_GROUPED),lwd=1) +
+  geom_point(size=3) +
+  geom_errorbar(aes(ymin=shannon_mean-shannon_se, ymax=shannon_mean+shannon_se), width=.1)+
+  labs(title= "B) Shannon", x="Year", y="Mean ENS", colour = "Strata")+
+  scale_colour_manual(labels=c("High reef", "Linear reef", "Patch reef"), values= c("red", "green", "blue"))+
+  scale_x_continuous(limits = c(1999, 2016), breaks = c(2000,2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016), labels=c("2000","","2004","","2008","","2012","","2016"))+
+  theme_bw()+
+  theme(
+      legend.position="none",
+      panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank(),
+      axis.title.x=element_text(size=12),
+      axis.title.y=element_text(size=12),
+      title=element_text(size=12))
+ggsave(file="shannon_by_year_and_strata_grouped.pdf", path="plots")
+
+#simpson
+sim_gs= ggplot(matrices_strat_grouped,aes(x=YEAR,y=simpson_mean, colour=STRAT_GROUPED, group=STRAT_GROUPED))+ #shape=STRAT
+  geom_line(aes(group=STRAT_GROUPED),lwd=1) +
+  geom_point(size=3) +
+  geom_errorbar(aes(ymin=simpson_mean-simpson_se, ymax=simpson_mean+simpson_se), width=.1)+
+  labs(title= "C) Simpson", x="Year", y="Mean ENS", colour = "Strata")+
+  scale_colour_manual(labels=c("High reef", "Linear reef", "Patch reef"), values= c("red", "green", "blue"))+
+  scale_x_continuous(limits = c(1999, 2016), breaks = c(2000,2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016), labels=c("2000","","2004","","2008","","2012","","2016"))+
+  theme_bw()+
+  theme(
+      legend.position="none",
+      panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank(),
+      axis.title.x=element_text(size=12),
+      axis.title.y=element_text(size=12),
+      title=element_text(size=12))
+ggsave(file="simpson_by_year_and_strata_grouped.pdf", path="plots")
+
+#functional
+func_gs= ggplot(matrices_strat_grouped,aes(x=YEAR,y=func.div_mean, colour=STRAT_GROUPED, group=STRAT_GROUPED))+ #shape=STRAT
+  geom_line(aes(group=STRAT_GROUPED),lwd=1) +
+  geom_point(size=3) +
+  geom_errorbar(aes(ymax=func.div_mean+func.div_se,ymin=func.div_mean-func.div_se),width=0.1)+
+  labs(title= "D) Functional", x="Year", y="Mean ENS", colour = "Strata")+
+  scale_colour_manual(labels=c("High reef", "Linear reef", "Patch reef"), values= c("red", "green", "blue"))+
+  scale_x_continuous(limits = c(1999, 2016), breaks = c(2000,2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016), labels=c("2000","","2004","","2008","","2012","","2016"))+
+  theme_bw()+
+  theme(
+      legend.position="none",
+      panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank(),
+      axis.title.x=element_text(size=12),
+      axis.title.y=element_text(size=12),
+      title=element_text(size=12))
+ggsave(file="functional_by_year_and_strata_grouped.pdf", path="plots")
+
+for_legend_gs_horiz = ggplot(matrices_strat_grouped,aes(x=YEAR,y=richness_mean, colour=STRAT_GROUPED, group=STRAT_GROUPED))+ 
+  geom_line(aes(group=STRAT_GROUPED),lwd=1) +
+  geom_point(size=3) +
+  labs(colour = "Strata")+
+  scale_colour_manual(labels=c("High reef", "Linear reef", "Patch reef"), values= c("red", "green", "blue"))+
+    theme(
+      legend.position="bottom", #"none", "right",c(0.8,0.68),
+      legend.text=element_text(size=11),
+      legend.key.size=unit(5,"mm"))
+legend_gs_horiz <- get_legend(for_legend_gs_horiz)
+
+#all plots on one page
+g_gs <- grid.arrange(rich_gs,shan_gs,sim_gs,func_gs,ncol=2)
+ggsave(file="all_indices_by_year_and_strata_grouped.pdf", g_gs, width=7, height=10, path="plots")
+
+```
+
+Dunn's test by strata 
+
+```{r Dunn's test by strata}
+
+all_matrices_data$STRAT = factor(all_matrices_data$STRAT, levels=c("FMLR", "FSLR", "HRRF", "OFPR", "MCPR", "INPR", "FDLR"))
+levels(all_matrices_data$STRAT)
+
+#richness
+kruskal.test(all_matrices_data$richness~all_matrices_data$STRAT)
+
+dt_rich_strat = dunnTest(richness~STRAT, data=all_matrices_data)
+dt_richnnes_strat = dt_rich_strat$res
+
+cldList(P.adj~Comparison,
+        data = dt_richnnes_strat,
+        threshold = 0.05)
+
+#Shannon strata
+kruskal.test(all_matrices_data$shannon~all_matrices_data$STRAT)
+
+dt_shan_strat = dunnTest(shannon~STRAT, data=all_matrices_data)
+dt_shannon_strat = dt_shan_strat$res
+
+cldList(P.adj~Comparison,
+        data = dt_shannon_strat,
+        threshold = 0.05)
+
+#Simpson 
+kruskal.test(all_matrices_data$simpson~all_matrices_data$STRAT)
+
+dt_simp_strat = dunnTest(simpson~STRAT, data=all_matrices_data)
+dt_simpson_strat = dt_simp_strat$res
+
+cldList(P.adj~Comparison,
+        data = dt_simpson_strat,
+        threshold = 0.05)
+
+#Functional  
+kruskal.test(all_matrices_data$func.div~all_matrices_data$STRAT)
+
+
+dt_fd_strat = dunnTest(func.div~STRAT, data=all_matrices_data)
+dt_functional_strat = dt_fd_strat$res
+
+cldList(P.adj~Comparison,
+        data = dt_functional_strat,
+        threshold = 0.05)
+
+DunnTest_strata = cbind(dt_richnnes_strat, dt_simpson_strat, dt_shannon_strat, dt_functional_strat)
+
+write_csv(DunnTest_strata, "DunnTest_strata.csv") 
+
+```
+
+Dunn's test by year 
+
+```{r Dunn's test by year}
+
+all_matrices_data$YEAR = factor(all_matrices_data$YEAR, levels=c("1999", "2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2014","2016"))
+levels(all_matrices_data$YEAR)
+
+#richness
+kruskal.test(all_matrices_data$richness~all_matrices_data$YEAR)
+#Kruskal-Wallis chi-squared = 199.14, df = 15, p-value < 2.2e-16
+
+dt_rich_year = dunnTest(richness~YEAR, data=all_matrices_data)
+dt_richnnes_year = dt_rich_year$res
+
+cldList(P.adj~Comparison,
+        data = dt_richnnes_year,
+        threshold = 0.05)
+
+#Shannon strata
+kruskal.test(all_matrices_data$shannon~all_matrices_data$YEAR)
+
+dt_shan_year = dunnTest(shannon~YEAR, data=all_matrices_data)
+dt_shannon_year = dt_shan_year$res
+
+cldList(P.adj~Comparison,
+        data = dt_shannon_year,
+        threshold = 0.05)
+
+#Simpson 
+kruskal.test(all_matrices_data$simpson~all_matrices_data$YEAR)
+
+dt_simp_year = dunnTest(simpson~YEAR, data=all_matrices_data)
+dt_simpson_year = dt_simp_year$res
+
+cldList(P.adj~Comparison,
+        data = dt_simpson_year,
+        threshold = 0.05)
+
+#Functional  
+kruskal.test(all_matrices_data$func.div~all_matrices_data$YEAR)
+
+dt_fd_year = dunnTest(func.div~YEAR, data=all_matrices_data)
+dt_functional_year = dt_fd_year$res
+
+cldList(P.adj~Comparison,
+        data = dt_functional_year,
+        threshold = 0.05)
+
+DunnTest_year = cbind(dt_richnnes_year, dt_simpson_year, dt_shannon_year, dt_functional_year)
+
+write_csv(DunnTest_year, "DunnTest_year.csv") 
 
 ```
