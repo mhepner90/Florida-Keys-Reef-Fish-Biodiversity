@@ -442,7 +442,7 @@ if(!file.exists('diversity_data.csv')){
   sample_data = RVCdata_FK$sample_data %>%
     as.tibble() %>%
     select(-SPECIES_CD, -SPECIES_NR, -REGION, -TIME_SEEN, -LEN, -NUM)%>%
-    group_by(YEAR,PRIMARY_SAMPLE_UNIT, PROT, MPA_NR)%>% 
+    group_by(YEAR,PRIMARY_SAMPLE_UNIT, STRAT, PROT, MPA_NR)%>% 
     summarize(
       LAT_DEGREES = mean(LAT_DEGREES),
       LON_DEGREES = mean(LON_DEGREES),
@@ -521,7 +521,7 @@ ggsave(file="diversity_plot.pdf", width=7, height=7, path="plots")
 
 ```
 
-```{r diversity by no take marine zones and year}
+```{r diversity by year and no take marine zoneS}
 
 all_matrices_data = read_csv("diversity_data.csv")
 
@@ -669,7 +669,7 @@ legend_prot_horiz <- get_legend(for_legend_prot_horiz)
 #all plots on one page
 g_prot <- grid.arrange(rich_prot,shan_prot,simp_prot,func_prot)
 
-ggsave(file="all_indices_by_year_and_protection.pdf", g_prot, width=7, height=10, path="plots")
+ggsave(file="all_indices_by_year_and_protection.pdf", g_prot, width=10, height=7, path="plots")
 
 ```
 
@@ -840,12 +840,14 @@ Dunn's test by strata
 
 ```{r Dunn's test by strata}
 
+all_matrices_data = read_csv("diversity_data.csv") 
+
 all_matrices_data$STRAT = factor(all_matrices_data$STRAT, levels=c("FMLR", "FSLR", "HRRF", "OFPR", "MCPR", "INPR", "FDLR"))
 levels(all_matrices_data$STRAT)
 
 #richness
 kruskal.test(all_matrices_data$richness~all_matrices_data$STRAT)
-
+#Kruskal-Wallis chi-squared = 1172.2, df = 6, p-value < 2.2e-16
 dt_rich_strat = dunnTest(richness~STRAT, data=all_matrices_data)
 dt_richnnes_strat = dt_rich_strat$res
 
