@@ -51,7 +51,50 @@ group_by =  dplyr::group_by #override plotly::group_by
 summarise = dplyr::summarise #override plotly::summarise
 ```
 
-Fetch abundance data for each primary sampling unit (PSU) from 1999 - 2016 
+# Fetch abundance data 
+
+Reef fish community data used in this study were collected as part of the multi-agency Reef Visual Census (RVC) [Brandt et al., 2009](https://www.coris.noaa.gov/activities/fish_monitoring_protocol/). Fish communities were visually surveyed underwater annually in the mainland FKNMS (Lower Keys, Middle Keys and Upper Keys) from 1999 to 2012, and biennially from 2012 to 2016.
+
+The RVC uses a stationary point count method within a randomly selected 7.5 m radius circular plot with a 200m X 200m mapgrid from 1999 to 2012 and 100m x 100m map grid from 2014 to 2016 to optimize the observation of conspicuous and diurnally active reef fish, specifically economically and ecologically important reef fish species [Bohnsack and Bannerot, 1986](https://docs.lib.noaa.gov/noaa_documents/NMFS/TR_NMFS/TR_NMFS_41.pdf). 
+
+Data was obtained using Jeremiah Blondeau's [RVC statistical package](https://github.com/jeremiaheb/rvc)
+
+## Sample Data Variables
+- PRIMARY_SAMPLE_UNIT: A code indicating the primary sample unit in which a sample was collected.
+- YEAR: A number indicating the calendar year.
+- MONTH: A number indicating the month of the year.
+- DAY: A number indicating the day of the month (EST).
+- STATION_NR: A number indicating the secondary sampling unit within a given primary sample unit.
+- LAT_DEGREES: Latitude of secondary sampling unit in decimal degrees).
+- LON_DEGREES: Longitude of secondary sampling unit in decimal degrees).
+- DEPTH: Average depth, in meters, of secondary sampling unit).
+- UNDERWATER_VISIBILITY: visibility, in meters, at secondary sampling unit.
+- MAPGRID_NR: A number indicating the primary sample unit.  
+- HABITAT_CD: A code indicating the habitat type. 
+- ZONE_NR: A code indicating the distance offshore: 
++ 1 - Inshore
++ 2 - Midchannel
++ 3 - Offshore
++ 4 - Fore-reef
+- SUBREGION_NR: A number indicating the subregion.
+- MPA_NR: A number identifying the marine protected area in which the sample was collected. Zero indicates unprotected status)
+- SPECIES_NR: A number indicating the species for a sample 
+- SPECIES_CD: A code indicating the species for a sample. Consists of the first three letters of the generic name and the first four of the specific name   
+- LEN: The length, in cm, of a sample.      
+- NUM: The number of individuals of a given species and length observed in a secondary sampling unit
+- TIME_SEEN: A number indicating when, during sampling, an individual was observed. 1: In the first five minutes, 2: From 5-10 minutes, 3: After 10 minutes. 
+- PROT: A boolean value indicating whether a sample was in a protected area or not 
++ 1 - protected area
++ 0 - not protected 
+- STRAT: A code indicating the stratum in which a sample was taken.   
++ FMLR
++ FSLR
++ HRRF
++ INPR
++ MCPR 
++ OFPR
+- REGION: A code indicating the region in which a sample was taken.
++ FLA KEYS (florida keys)
 
 ```{r fetch abundance data}
 
@@ -149,10 +192,9 @@ if(!file.exists("psu_fk_abun.csv")){
 
 #Clean data 
 
-Cleaned the data by:
+Cleaned data by:
 - removed sampling events with no individuals
-- removed sampling events with only 1 individuals
-- removed species not identified to species level (e.g., genus)
+- removed species not identified to species level 
 - removed sampling events with uncharactertistically large abundance values 
 - removed species that did not occur in at least 5% of the entire dateset
 
@@ -239,13 +281,15 @@ if(!file.exists("clean_data.csv")){
 
 ```
 
-Species-trait matrix
+#Species-trait matrix
+
+Functional distances were computed following [Lefhceck et al., 2014](http://onlinelibrary.wiley.com/doi/10.1890/ES13-00284.1/abstract). Code below modified from [ChessMap.Rmd](https://figshare.com/collections/Dimensions_of_biodiversity_in_Chesapeake_Bay_demersal_fishes_patterns_and_drivers_through_space_and_time/3308337)
 
 ```{r species-trait matrix}
 
 if (!file.exists("functional_distance_rds")){
   
-  trait_matrix = read_csv('species_trait_matrix_316_spp_10_25_17.csv')
+  trait_matrix = read_csv('species_trait_matrix.csv')
   
   trait_matrix = trait_matrix %>%
     as.tibble() %>%
@@ -378,10 +422,84 @@ if(!file.exists("functional_distance_common_rds")){
   func.dist.common = readRDS("functional_distance_common_rds")
 }
 
+dend = as.dendrogram(func.dist.common)
+
+dendrogram = dend %>%
+color_branches(dend, k=10) %>% #color the branches based on the clusters 
+  set("labels_cex", 1.2) %>% #size of the labels #0.8
+  set("nodes_pch", 19) %>% #type of nodes
+  set("nodes_cex", 0.5) %>% #size of nodes 
+  set("nodes_col", 1) %>% #color of nodes
+  set("branches_lwd", 1.5) #%>% #thickness of branch 
+
+#plot functional dendrogram 
+pdf("functional_dendrogram.pdf", width = 8, height = 30) 
+par(pin=c(4,9))
+#par(mar = c(3,3,3,7))
+plot(dendrogram,
+     main= "Florida Keys Reef Fish\nFunctional dendrogram", 
+     xlab = "Dissimilarity",
+     ylab = "",
+     sub = NULL,
+     horiz = T,
+     ps=60, 
+     #hang = -1,
+     nodePar = list(cex = .007))
+dev.off()
+
+#trait visualization 
+
+trait_matrix_treemap = trait_matrix %>%
+  select(SPECIES_CD, Maxlength, Trophic_level, Trophic_group, Water_column,Diel_activity,Substrate_type,Complexity, Gregariousness) %>% 
+  group_by(Maxlength,
+           Trophic_level,
+           Trophic_group,
+           Water_column,
+           Diel_activity,
+           Substrate_type,
+           Complexity,
+           Gregariousness) %>%
+  summarise(n = n())%>% 
+  ungroup() %>%
+  as.data.frame()
+
+treemap = 
+   d3treeR::d3tree2(
+    treemap(
+      dtf = trait_matrix_treemap,
+      index = c("Trophic_group", "Diel_activity", "Substrate_type", "Trophic_level", "Water_column","Maxlength","Complexity","Gregariousness"),
+      vSize = "n", 
+      vColor = "Trophic_group",
+      type = "index"),
+    #title = "Reef Fish Traits",
+    #fontsize.title = 14, 
+    #algorithm = "squarified"
+    rootname = "Species Traits")
+
+htm = "./htmlwidget_treemap2.html"
+saveWidget(treemap, htm)
 
 ```
 
-Compute diversity indices 
+#Compute reef fish biodiversity 
+
+All indices were computed as effective number of species. Effective number of species is the number of equally abundance species needed to produce the observed value of a diversity index ( [Jost, 2006](http://onlinelibrary.wiley.com/doi/10.1111/j.2006.0030-1299.14714.x/abstract); [Jost,2010](https://www.researchgate.net/publication/41667724_The_Relation_between_Evenness_and_Diversity); [MacArthur, 1965](http://onlinelibrary.wiley.com/doi/10.1111/j.1469-185X.1965.tb00815.x/abstract?systemMessage=Wiley+Online+Library+will+be+disrupted+6+Aug+from+10-12+BST+for+monthly+maintenance) ). Jost, 2006 refers to these as true measures of diversity, where prior to the conversion the diversity indices are simply measures of entropy. 
+
+- Species Richness is the number of species in a habitat sampled  
+
+$Richness = \sum_{i=1}^S p_i^0$  
+
+- Simpson diversity measures the probability that two individuals randomly selected from a sample will belong to different species.   
+
+$Simpson = 1 - \sum_{i=1}^S p_i^2$  
+
+- Shannon diveristy is a measure of entropy, it is the uncertainty in the species identity of a sample  
+
+$Shannon = - \sum_{i=1}^S p_i \log_b p_i$  
+
+- Functional diversity (Rao's Q) is a measure of pairwise functional differences between species weighted by their relative abundances   
+
+$Rao Q = \sum_{i=1}^S-1 \sum_{j=i+1}^S d_i p_i p_j$
 
 ```{r biodiversity}
 
@@ -435,6 +553,11 @@ if(!file.exists('diversity_data.csv')){
   #Cast abundance longways (species as columns)
   abundmat <- spread(abundance, SPECIES_CD, abundance, fill = 0) 
   #dim(abundmat)5,235*112
+  
+  # Drop communities with no species (roughly 500 sites)
+  #abundmat <- abundmat[!rowSums(abundmat) == 0,] 
+  #dim(abundmat) #5,241     316
+  #abundmat <- abundmat[!rowSums(abundmat) == 1,]
   
   #Subset species whose names only appear in traits
   abundmat <- abundmat[colnames(abundmat) %in% rownames(species_trait_matrix)] 
@@ -515,6 +638,95 @@ if(!file.exists('diversity_data.csv')){
   
 ```
 
+#Species Accumulation Curve
+
+Computed mean species accumulation curve and its standard deviation from random permutations of the data to estimate the amound of surveys needed to accuratly calculate diversity. 
+
+Computed species-based rarefraction which is the expected number of species *s* when *m samples* are drawn at random (without replacement) from a set of samples that are representative of the assemblage (Gotelli and Colwell, 2001; Colewell et al. 2004). The sample-based rarefraction preserves the spatial structure of the data.
+
+```{r SAC and Rarefraction}
+
+clean_data = read_csv("clean_data.csv")
+species_trait_matrix = read_csv("species_trait_matrix.csv") %>%
+    as.data.frame()
+
+#Set rownames on traits and remove other info
+  rownames(species_trait_matrix) <- species_trait_matrix$SPECIES_CD
+  species_trait_matrix <- species_trait_matrix[, -c(1:4)]
+  #Convert rownames to all caps
+  rownames(species_trait_matrix) <- toupper(rownames(species_trait_matrix))
+  
+  abundance = clean_data %>%
+    select(YEAR, PRIMARY_SAMPLE_UNIT, SPECIES_CD, abundance) %>% 
+    group_by(YEAR, PRIMARY_SAMPLE_UNIT)%>%
+    mutate(abun = ifelse(
+      abundance>0&abundance<1, 1, abundance))%>%
+    mutate(abun = round(abun, 0))%>%
+    select(-abundance)
+  #dim(abundance) 192780x4 : 5235 groups 
+  
+  #Cast abundance longways (species as columns)
+  abundmat <- spread(abundance, SPECIES_CD, abun, fill = 0) 
+  #dim(abundmat)5,235*112
+  
+  #Subset species whose names only appear in traits
+  abundmat <- abundmat[colnames(abundmat) %in% rownames(species_trait_matrix)] #5,238 sites *108species
+  
+  #Drop communities with no species (roughly 500 sites)
+  abundmat <- abundmat[!rowSums(abundmat) == 0,] #5,235 x 108
+  #dim(abundmat) #5,241     316
+  abundmat <- abundmat[!rowSums(abundmat) == 1,]#5,235 x 108
+  
+  abundmat = as.data.frame(abundmat)
+  
+  #Species accumulation “Species accumulation models and species poolmodels study collections of sites, and their species richness, or try to estimate the number of unseen species.” (Oksanen 2016)
+  
+  #finds the mean SAC and its standard deviation from random permutations of the data
+  Species_Accumulation_Curve = vegan::specaccum(abundmat, "random") #abundmat[1:500,]
+  
+  #plots the species accumulation curve and the confidence intervals for sites.
+  SAC_random = plot(Species_Accumulation_Curve, ci.type="poly", col="lightpink", lwd=2, ci.lty=0, ci.col="hotpink", xlim=range(1:100),xlab="Number of samples", ylab= "Number of species", main="Species Accumulation Curve", ylim=c(0,120))
+  boxplot(Species_Accumulation_Curve, col="yellow", border="blue",add=TRUE, pch="+", xlim=range(1:100))
+  ggsave(file="species_accum_curve.pdf",path="plots",SAC_random)
+  
+  #Fit nonlinear Arrhenius models to species random accumulation
+  mods = fitspecaccum(Species_Accumulation_Curve, "arrh")
+  plot(mods, col="hotpink",xlim=range(1:100))
+  boxplot(Species_Accumulation_Curve, col = "yellow", border = "blue", lty=1, cex=0.3, add= TRUE, xlim=range(1:100))
+  
+  #Fit Lomolino model to the exact accumulation
+  #finds the expected (mean) species richness
+  SAC_exact = specaccum(abundmat, "exact")
+  plot(SAC_exact, ci.type="poly", col="blue", lwd=2, ci.lty=0, ci.col="lightblue", xlim=range(1:100))
+  mod1=fitspecaccum(SAC_exact, "lomolino")
+  coef(mod1)
+  fitted(mod1)
+  plot(SAC_exact, col="hotpink",lwd=2)
+  ## Add Lomolino model using argument 'add'
+  plot(mod1, add = TRUE, col="blue", lwd=2)
+  
+#Rarefaction “Species richness increases with sample size, and differences in richness actually may be caused by differences in sample size. To solve this problem, we may try to rarefy species richness to the same number of individuals… Rarefaction is sometimes presented as an ecologically meaningful alternative to dubious diversity indices (Hurlbert, 1971), but the differences really seem to be small.” (Oksanen 2016)
+
+#observed number of species
+S <- specnumber(abundmat) 
+#Number of INDIVIDULS per site
+(raremax = min(rowSums(abundmat))) #2
+#rarefy, w/ raremax as input
+Srare <- rarefy(abundmat, raremax) #se=T
+Srare2 <- rarefy(abundmat, 100)
+#Plot rarefaction results
+par(mfrow = c(1,2))
+plot(Sp_rich, Srare, xlab = "Observed No. of Species", ylab = "Rarefied No. of Species", main="Rarefaction")
+abline(0, 1)
+#rarecurve(): draws a rarefaction curve for each row of the input data
+rarecurve(abundmat, step = 20, sample = raremax, col = "blue", cex = 0.6, main="Rarecurve")
+
+plot
+
+
+
+```
+
 #Plots
 
 ```{r plot all diversity by year}
@@ -561,7 +773,7 @@ all_matrices_data = read_csv("diversity_data.csv")
       plot.title =element_text(hjust = 0.5),
       legend.text = element_text(size=12),
       legend.title =element_blank())
-ggsave(file="diversity_plot_leg_right.pdf", width=10, height=7, path="plots")
+ggsave(file="diversity_by_year_leg_right.pdf", width=10, height=7, path="plots")
 
 ```
 
@@ -709,7 +921,7 @@ ggsave(file="legend_year_protection.pdf", path="plots", legend_prot_horiz, width
 g_prot <- grid.arrange(rich_prot,shan_prot,simp_prot,func_prot)
 
 
-ggsave(file="all_indices_by_year_and_protection.pdf", g_prot, width=10, height=7, path="plots")
+ggsave(file="diversity_by_year_and_protection.pdf", g_prot, width=10, height=7, path="plots")
 
 ```
 
@@ -838,7 +1050,7 @@ ggsave(file="legend_year_and_strata_grouped.pdf", legend_gs_horiz, width=10, hei
 
 #all plots on one page
 g_gs <- grid.arrange(rich_gs,shan_gs,sim_gs,func_gs,ncol=2)
-ggsave(file="all_indices_by_year_and_strata_grouped.pdf", g_gs, width=10, height=7, path="plots")
+ggsave(file="diversity_by_year_and_strata_grouped.pdf", g_gs, width=10, height=7, path="plots")
 
 ```
 
@@ -967,7 +1179,7 @@ for_legend_horiz = ggplot(stats_all_matrices_data,aes(x=YEAR,y=richness_mean, co
 legend_horiz <- get_legend(for_legend_horiz)
 
 g1 <- grid.arrange(arrangeGrob(rich_ys,shan_ys,ncol=2),arrangeGrob(sim_ys,func_ys,ncol=2),legend_horiz,nrow=3,heights=c(2,2,.4))
-ggsave(file="all_indices_by_year_and_strata.pdf", g1, width=10, height=8, path="plots")
+ggsave(file="diversity_by_year_and_strata.pdf", g1, width=10, height=8, path="plots")
 
 ```
 
@@ -1037,7 +1249,7 @@ diversity_ntmr_plot = diversity_ntmr %>%
     legend.text=element_text(size=12),
     plot.title=element_text(hjust=0.5))
 
-ggsave(file="diversity_by_level_of_protection.pdf",diversity_ntmr_plot, width=10,height=4, path="plots")
+ggsave(file="diversity_by_level_of_protection_bargraph.pdf",diversity_ntmr_plot, width=10,height=4, path="plots")
   
 ```
 
