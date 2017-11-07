@@ -31,6 +31,7 @@ library(moments) # contains skewness function
 library(nortest) #checks for normality 
 library(parallel) #clusterEvalQ,clusterExport,detectCores,makeCluster,parLapply
 library(plotrix) #std.error
+library(plotly) #plot_ly
 library(psych) #pairs.panels 
 library(purrr) #map
 library(rcompanion) #cldList
@@ -192,8 +193,8 @@ if(!file.exists("clean_data.csv")){
   taxonimic_data = RVCdata_FK$taxonomic_data
   
   species_occured_5_percent_data = left_join(remove_rare_sp,taxonimic_data, by="SPECIES_CD")%>%
-    select(SPECIES_CD,FAMILY,SCINAME,COMNAME) #108 x 4 
-  
+    select(SPECIES_CD,FAMILY,SCINAME,COMNAME)#108 x 4
+
   #remove species from abundance data didn't occur 5% of the sampling events 
   clean_data = left_join(clean_data, species_occured_5_percent_data, by="SPECIES_CD") 
   #dim(clean_data) 192,780x13 (108 species)
@@ -222,6 +223,18 @@ if(!file.exists("clean_data.csv")){
 }else{
   clean_data = read_csv("clean_data.csv", 
                         col_types = cols(protected_status = col_character()))
+  
+  abundance_pie_chart = clean_data %>%
+    dplyr::select(SPECIES_CD, COMNAME,abundance)%>%
+    dplyr::group_by(COMNAME) %>% #SPECIES_CD
+    dplyr::summarize(abundance_sum = sum(abundance)) %>%
+    mutate(com_percent = (abundance_sum/sum(abundance_sum))*100) %>%
+    mutate(com_percent=round(com_percent,2)) %>%
+    arrange(desc(com_percent))
+    
+  abun_pie_chart = plot_ly(abundance_pie_chart, labels=~COMNAME, values =~com_percent, type="pie")
+  pie = './htmlwidget_abunpie.html'
+  saveWidget(abun_pie_chart, pie)
 }
 
 ```
@@ -523,32 +536,32 @@ all_matrices_data = read_csv("diversity_data.csv")
   diveristy_year_plot = diversity_plot %>% 
     ggplot(.,aes(x=YEAR, y=value.mean, color=variable))+
     geom_errorbar(aes(ymax=value.mean+value.se,ymin=value.mean-value.se),width=0.2)+
-    geom_point(size=1.5)+
-    geom_line(aes(group=variable),lwd=1)+
+    geom_point(size=2.5)+
+    geom_line(aes(group=variable),lwd=2)+
     labs(title= "Florida Keys Reef Fish Biodiversity", x="Year", y="Mean effective \nnumber of species (± SE)", colour = "Diversity index")+
-    scale_y_continuous(limits= c(0,50),
-                       breaks=c(0,5,10,15,20,25,30,35,40,45,50), 
-                       labels=c("0","","10","","20","","30","","40","","50"))+
+    scale_y_continuous(limits= c(0,45),
+                       breaks=c(0,5,10,15,20,25,30,35,40,45), 
+                       labels=c("0","","10","","20","","30","","40",""))+
     scale_x_continuous(limits = c(1999, 2016), breaks = c(2000,2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016), labels=c("2000","","2004","","2008","","2012","","2016"))+
   scale_color_manual(
-    labels= c("Richness","Shannon diversity","Simpson diversity","Functional diversity"),
+    labels= c("Richness","Shannon","Simpson","Functional"),
     values=c("Richness"="red",
              "Shannon"="orange",
              "Simpson"="forestgreen",
              "Functional"="blue"))+
   theme_bw()+
   theme(
-      legend.position="bottom",
+      legend.position="right",
       panel.grid.major=element_blank(),
       panel.grid.minor=element_blank(),
       #panel.background=element_rect(fill="grey45"),
       axis.title.x=element_text(size=12),
       axis.title.y=element_text(size=12),
-      title=element_text(size=12),
+      title=element_text(size=12, face = "bold"),
       plot.title =element_text(hjust = 0.5),
       legend.text = element_text(size=12),
       legend.title =element_blank())
-ggsave(file="diversity_plot.pdf", width=7, height=7, path="plots")
+ggsave(file="diversity_plot_leg_right.pdf", width=10, height=7, path="plots")
 
 ```
 
@@ -582,13 +595,7 @@ matrices_ntmr = all_matrices_data %>%
       func.div_sd = sd(func.div),
       func.div_se = func.div_sd / sqrt(func.div_n),
       func.div_min = min(func.div),
-      func.div_max = max(func.div),
-      evenness_mean = mean(evenness),
-      evenness_n = length(evenness),
-      evenness_sd = sd(evenness),
-      evenness_se = evenness_sd / sqrt(evenness_n),
-      evenness_min = min(evenness),
-      evenness_max = max(evenness))
+      func.div_max = max(func.div))
 
 #richness
 rich_prot = ggplot(matrices_ntmr,aes(x=YEAR,y=richness_mean, colour=factor(PROT), group=factor(PROT)))+ 
@@ -692,13 +699,15 @@ for_legend_prot_horiz = ggplot(matrices_ntmr,aes(x=YEAR,y=richness_mean, colour=
   labs(colour = "")+
   scale_colour_manual(labels=c("Protected", "Not Protected"), values= c("red", "blue"))+
     theme(
-      legend.position="bottom", #"none", "right",c(0.8,0.68),
-      legend.text=element_text(size=11),
+      legend.position="right", #"none", "right",c(0.8,0.68),
+      legend.text=element_text(size=12),
       legend.key.size=unit(5,"mm"))
 legend_prot_horiz <- get_legend(for_legend_prot_horiz)
+ggsave(file="legend_year_protection.pdf", path="plots", legend_prot_horiz, width=3, height=2)
 
 #all plots on one page
 g_prot <- grid.arrange(rich_prot,shan_prot,simp_prot,func_prot)
+
 
 ggsave(file="all_indices_by_year_and_protection.pdf", g_prot, width=10, height=7, path="plots")
 
@@ -741,13 +750,7 @@ matrices_strat_grouped = all_matrices_data %>%
       func.div_sd = sd(func.div),
       func.div_se = func.div_sd / sqrt(func.div_n),
       func.div_min = min(func.div),
-      func.div_max = max(func.div),
-      evenness_mean = mean(evenness),
-      evenness_n = length(evenness),
-      evenness_sd = sd(evenness),
-      evenness_se = evenness_sd / sqrt(evenness_n),
-      evenness_min = min(evenness),
-      evenness_max = max(evenness))
+      func.div_max = max(func.div))
 
 #richness
 rich_gs= ggplot(matrices_strat_grouped,aes(x=YEAR,y=richness_mean, colour=STRAT_GROUPED, group=STRAT_GROUPED))+ #shape=STRAT
@@ -827,15 +830,263 @@ for_legend_gs_horiz = ggplot(matrices_strat_grouped,aes(x=YEAR,y=richness_mean, 
   labs(colour = "Strata")+
   scale_colour_manual(labels=c("High reef", "Linear reef", "Patch reef"), values= c("red", "green", "blue"))+
     theme(
-      legend.position="bottom", #"none", "right",c(0.8,0.68),
-      legend.text=element_text(size=11),
+      legend.position="right", #"none", "right",c(0.8,0.68),
+      legend.text=element_text(size=12),
       legend.key.size=unit(5,"mm"))
 legend_gs_horiz <- get_legend(for_legend_gs_horiz)
+ggsave(file="legend_year_and_strata_grouped.pdf", legend_gs_horiz, width=10, height=1, path="plots")
 
 #all plots on one page
 g_gs <- grid.arrange(rich_gs,shan_gs,sim_gs,func_gs,ncol=2)
 ggsave(file="all_indices_by_year_and_strata_grouped.pdf", g_gs, width=10, height=7, path="plots")
 
+```
+
+```{r plot each diversity by year and strata}
+
+all_matrices_data = read_rds("psu_matrices_data_rds")
+
+stats_all_matrices_data = all_matrices_data %>%
+    group_by(YEAR, STRAT) %>% #110 groups 
+    summarize(
+      richness_mean = mean(richness),
+      richness_n = length(richness),
+      richness_sd = sd(richness),
+      richness_se = richness_sd / sqrt(richness_n),
+      richness_min = min(richness),
+      richness_max = max(richness),
+      shannon_mean = mean(shannon),
+      shannon_n = length(shannon),
+      shannon_sd = sd(shannon),
+      shannon_se = shannon_sd / sqrt(shannon_n),
+      shannon_min = min(shannon),
+      shannon_max = max(shannon),
+      simpson_mean = mean(simpson),
+      simpson_n = length(simpson),
+      simpson_sd = sd(simpson),
+      simpson_se = simpson_sd / sqrt(simpson_n),
+      simpson_min = min(simpson),
+      simpson_max = max(simpson),
+      func.div_mean = mean(func.div),
+      func.div_n = length(func.div),
+      func.div_sd = sd(func.div),
+      func.div_se = func.div_sd / sqrt(func.div_n),
+      func.div_min = min(func.div),
+      func.div_max = max(func.div))
+
+#richness
+rich_ys = ggplot(stats_all_matrices_data,aes(x=YEAR,y=richness_mean, colour=STRAT, group=STRAT))+ #shape=STRAT
+  geom_line(aes(group=STRAT),lwd=1) +
+  geom_point(size=3) +
+  geom_errorbar(aes(ymin=richness_mean-richness_se, ymax=richness_mean+richness_se), width=.2)+
+  labs(title= "A) Richness", x="Year", y="Mean effective \nnumber of species (± SE)", colour = "Strata")+
+  scale_x_continuous(limits = c(1999, 2016), breaks = c(2000,2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016), labels=c("2000","","2004","","2008","","2012","","2016"))+
+  theme_bw()+
+  theme(
+      legend.position="none",
+      panel.background=element_blank(),
+      panel.grid.major=element_blank(), 
+      panel.grid.minor=element_blank(),
+      axis.title.x=element_text(size=12),
+      axis.title.y=element_text(size=12),
+      title=element_text(size=12),
+      plot.title =element_text(hjust = 0))
+ggsave(file="richness_by_year_and_strata.pdf", path="plots")
+
+# shannon
+shan_ys = ggplot(stats_all_matrices_data,aes(x=YEAR,y=shannon_mean, colour=STRAT, group=STRAT))+ #shape=STRAT
+  geom_line(aes(group=STRAT),lwd=1) +
+  geom_point(size=3) +
+  geom_errorbar(aes(ymax=shannon_mean+shannon_se,ymin=shannon_mean-shannon_se),width=0.1)+
+  labs(title= "B) Shannon", x="Year", y="Mean effective \nnumber of species (± SE)", colour = "Strata")+
+  scale_x_continuous(limits = c(1999, 2016), breaks = c(2000,2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016), labels=c("2000","","2004","","2008","","2012","","2016"))+
+  theme_bw()+
+  theme(
+      legend.position="none",
+      panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank(),
+      axis.title.x=element_text(size=12),
+      axis.title.y=element_text(size=12),
+      title=element_text(size=12))
+ggsave(file="shannon_by_year_and_strata.pdf", path="plots")
+
+#simpson
+sim_ys = ggplot(stats_all_matrices_data,aes(x=YEAR,y=simpson_mean, colour=STRAT, group=STRAT))+ #shape=STRAT
+  geom_line(aes(group=STRAT),lwd=1) +
+  geom_point(size=3) +
+  geom_errorbar(aes(ymin=simpson_mean-simpson_se, ymax=simpson_mean+simpson_se), width=.2)+
+  labs(title= "C) Simpson", x="Year", y="Mean effective \nnumber of species (± SE)", colour = "Strata")+
+  scale_x_continuous(limits = c(1999, 2016), breaks = c(2000,2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016), labels=c("2000","","2004","","2008","","2012","","2016"))+
+  theme_bw()+
+  theme(
+      legend.position="none",
+      panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank(),
+      axis.title.x=element_text(size=12),
+      axis.title.y=element_text(size=12),
+      title=element_text(size=12))
+ggsave(file="simpson_by_year_and_strata.pdf", path="plots")
+
+# functional
+func_ys= ggplot(stats_all_matrices_data,aes(x=YEAR,y=func.div_mean, colour=STRAT, group=STRAT))+ #shape=STRAT
+  geom_line(aes(group=STRAT),lwd=1) +
+  geom_point(size=3) +
+  geom_errorbar(aes(ymax=func.div_mean+func.div_se,ymin=func.div_mean-func.div_se),width=0.1)+
+  labs(title= "D) Functional", x="Year", y="Mean effective \nnumber of species (± SE)", colour = "Strata")+
+  scale_x_continuous(limits = c(1999, 2016), breaks = c(2000,2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016), labels=c("2000","","2004","","2008","","2012","","2016"))+
+  theme_bw()+
+  theme(
+      legend.position="none",
+      panel.grid.major=element_blank(),
+      panel.grid.minor=element_blank(),
+      axis.title.x=element_text(size=12),
+      axis.title.y=element_text(size=12),
+      title=element_text(size=12))
+ggsave(file="functional_by_year_and_strata.pdf", path="plots")
+
+#save legend
+for_legend_vert = ggplot(stats_all_matrices_data,aes(x=YEAR,y=richness_mean, colour=STRAT, group=STRAT))+
+  geom_line(aes(group=STRAT),lwd=1) +
+  geom_point(size=3) +
+  labs(colour = "Strata")+
+  theme(
+      legend.position="right", #"none", "right",c(0.8,0.68),
+      legend.text=element_text(size=12),
+      legend.key.size=unit(5,"mm"))
+legend_vert <- get_legend(for_legend_vert)
+ggsave(file="legend_year_and_strata.pdf", path="plots", width=8, height=1)
+
+for_legend_horiz = ggplot(stats_all_matrices_data,aes(x=YEAR,y=richness_mean, colour=STRAT, group=STRAT))+
+  geom_line(aes(group=STRAT),lwd=1) +
+  geom_point(size=3) +
+  labs(colour = "Strata")+
+  theme(
+      legend.position="bottom", #"none", "right",c(0.8,0.68),
+      legend.text=element_text(size=12),
+      legend.key.size=unit(5,"mm"))
+legend_horiz <- get_legend(for_legend_horiz)
+
+g1 <- grid.arrange(arrangeGrob(rich_ys,shan_ys,ncol=2),arrangeGrob(sim_ys,func_ys,ncol=2),legend_horiz,nrow=3,heights=c(2,2,.4))
+ggsave(file="all_indices_by_year_and_strata.pdf", g1, width=10, height=8, path="plots")
+
+```
+
+Diversity between SPA, SU, ER 
+
+"mapNumber" =  
+    0	Unprotected                 [unprotected]
+    1	Carysfort                   [Carysfort Sanctuary Preservation Area]
+    2	Elbow                       [Elbow Sanctuary Preservation Area]
+    3	Key_Largo_Dry_Rocks         [Key Largo Dry Rocks Sanctuary Preservation Area]
+    4	Grecian_Rocks               [Grecian Rocks Sanctuary Preservation Area]
+    5	French                      [French Reef Sanctuary Preservation Area]
+    6	Molasses                    [Molasses Reef Sanctuary Preservation Area]
+    7	Conch_Reef                  [Conch Reef Sanctuary Preservation Area]
+    8	Conch_RO                    [Conch Reef Research Only Area]
+    9	Davis                       [Davis Reef Sanctuary Preservation Area]
+    10 Hen_Chickens               [Hen and Chickens Sanctuary Preservation Area]
+    11 Cheeca_Rocks               [Cheeca Rocks Sanctuary Preservation Area]
+    12 Alligator                  [Alligator Reef Sanctuary Preservation Area]
+    13 Tennessee                  [Tennesse Reef Research Only Area]
+    14 Coffins_Patch              [Coffins Patch Sanctuary Preservation Area]
+    15 Sombrero                   [Sombrero Key Sanctuary Preservation Area]
+    16 Looe_Key                   [Looe Key Sanctuary Preservation Area]
+    17 Looe_RO                    [Looe Key Research Only Area]
+    18 Newfound_Harbor            [Newfound Harbor Key Sanctuary Preservation Area]
+    19 East_Sambo                 [Eastern Sambo Research Only Area]
+    20 West_Sambo                 [Western Sambo Ecological Reserve]
+    21 East_Dry_Rocks             [Eastern Dry Rocks Sanctuary Preservation Area]
+    22 Rock_Key                   [Rock Key Sanctuary Preservation Area]
+    23 Sand_Key                   [Sand Key Sanctuary Preservation Area]
+    24 North Ecological Reserve   [Tortugas North Ecological Reserve]
+    25 South Ecological Reserve   [Tortugas South Ecological Reserve]
+    26 Research Natural Area      [unprotected]
+    27 Not Protected              [unprotected]
+    28 Not Protected              [unprotected]
+
+```{r bargraph of diversity among different NTMR}
+
+all_matrices_data = read_csv("diversity_data.csv")
+
+diversity_ntmr = reshape2::melt(all_matrices_data, id.vars = c("MPA_NAME"),
+                                measure.vars=c("richness","shannon","simpson","func.div"))
+
+diversity_ntmr=plyr::ddply(diversity_ntmr, c("MPA_NAME", "variable"), summarize, 
+                           value.mean=mean(value),
+                           value.se=plotrix::std.error(value))
+levels(diversity_ntmr$variable)=c("Richness", "Shannon", "Simpson", "Functional")
+
+as.tibble(diversity_ntmr)
+
+diversity_ntmr_plot = diversity_ntmr %>%
+  ggplot(.,aes(x=MPA_NAME, y=value.mean,color=variable, group=variable, fill=variable))+ # 
+  geom_errorbar(aes(ymax=value.mean+value.se, ymin=value.mean-value.se), size=.6,width=0.3,position=position_dodge(.9))+
+  geom_bar(position="dodge",stat="identity", color="black",size=.3)+
+  labs(title="Biodiversity by Different Marine Zones", x="", y="Mean effective \nnumber of species (± SE)",color="",fill="")+
+  scale_fill_manual(
+    labels= c("Richness","Shannon","Simpson","Functional"),
+    values=c("Richness"="red",
+             "Shannon"="orange",
+             "Simpson"="forestgreen",
+             "Functional"="blue"))+
+  theme(
+    legend.position = "right",
+    legend.title=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    legend.text=element_text(size=12),
+    plot.title=element_text(hjust=0.5))
+
+ggsave(file="diversity_by_level_of_protection.pdf",diversity_ntmr_plot, width=10,height=4, path="plots")
+  
+```
+
+```{r bargraph of diversity among different strata}
+
+all_matrices_data = read_csv("diversity_data.csv")
+
+diversity_strata = reshape2::melt(all_matrices_data, id.vars = c("STRAT"),
+                                measure.vars=c("richness","shannon","simpson","func.div"))
+
+diversity_strata=plyr::ddply(diversity_strata, c("STRAT", "variable"), summarize, 
+                           value.mean=mean(value),
+                           value.se=plotrix::std.error(value))
+levels(diversity_strata$variable)=c("Richness", "Shannon", "Simpson", "Functional")
+
+as.tibble(diversity_strata) 
+
+# diversity_strata = diversity_strata %>%
+#   mutate(STRAT=
+#            ifelse(grepl("FDLR", STRAT),'Forereef Deep Linear Reef',
+#                   ifelse(grepl('FMLR', STRAT),'Foreef Medium Linear Reef',
+#                          ifelse(grepl('FSLR', STRAT),'Foreef Shallow Linear Reef',
+#                                 ifelse(grepl('HRRF', STRAT),'High Relief Reef',
+#                                        ifelse(grepl('INPR', STRAT),'Inshore Patch Reef',
+#                                               ifelse(grepl('MCPR', STRAT),'Midchannel Patch Reef',
+#                                                      ifelse(grepl('OFPR', STRAT),'Offshore Patch Reef',"IDK"))))))))
+                                       
+
+diversity_strata_bargraph = diversity_strata %>%
+  ggplot(.,aes(x=STRAT, y=value.mean,color=variable, group=variable, fill=variable))+ # 
+  geom_errorbar(aes(ymax=value.mean+value.se, ymin=value.mean-value.se), size=.6,width=0.3,position=position_dodge(.9))+
+  geom_bar(position="dodge",stat="identity", color="black",size=.3)+
+  labs(title="Biodiversity by Strata", x="", y="Mean effective \nnumber of species (± SE)",color="",fill="")+
+  scale_fill_manual(
+    labels= c("Richness","Shannon","Simpson","Functional"),
+    values=c("Richness"="red",
+             "Shannon"="orange",
+             "Simpson"="forestgreen",
+             "Functional"="blue"))+
+  theme(
+    legend.position = "right",
+    legend.title=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    legend.text=element_text(size=12),
+    plot.title=element_text(hjust=0.5))
+
+ggsave(file="diversity_by_strata_bargraph.pdf",diversity_strata_bargraph, width=10,height=4, path="plots")
+  
 ```
 
 #Statistical tests
@@ -1285,6 +1536,68 @@ cldList(P.adj~Comparison,
 
 ```
 
+Dunn's test by grouped strata 
+
+```{r Dunn's test by grouped strata}
+
+all_matrices_data = read_csv("diversity_data.csv") 
+
+matrices_strat_grouped = all_matrices_data %>% 
+    mutate(
+      STRAT_GROUPED = 
+      ifelse(grepl("FMLR|FSLR|FDLR", STRAT), 'LINEAR_REEF', 
+             ifelse(grepl("OFPR|MCPR|INPR", STRAT), 'PATCH_REEF',
+                    ifelse(grepl('HRRF', STRAT), 'HIGH_RELIEF', "IDK")))) %>%
+    group_by(YEAR, STRAT_GROUPED)
+
+matrices_strat_grouped$STRAT_GROUPED = factor(matrices_strat_grouped$STRAT_GROUPED, levels=c('LINEAR_REEF','PATCH_REEF','HIGH_RELIEF'))
+levels(matrices_strat_grouped$STRAT_GROUPED)
+
+#richness
+kruskal.test(matrices_strat_grouped$richness~matrices_strat_grouped$STRAT_GROUPED)
+#Kruskal-Wallis chi-squared = 721.91, df = 2, p-value < 2.2e-16
+dt_rich_strat = dunnTest(richness~STRAT_GROUPED, data=matrices_strat_grouped)
+dt_richnnes_strat = dt_rich_strat$res
+cldList(P.adj~Comparison,
+        data = dt_richnnes_strat,
+        threshold = 0.05)
+#All significantly different 
+
+#Shannon strata
+kruskal.test(matrices_strat_grouped$shannon~matrices_strat_grouped$STRAT_GROUPED)
+#Kruskal-Wallis chi-squared = 283.78, df = 2, p-value < 2.2e-16
+dt_shan_strat = dunnTest(shannon~STRAT_GROUPED, data=matrices_strat_grouped)
+dt_shannon_strat = dt_shan_strat$res
+cldList(P.adj~Comparison,
+        data = dt_shannon_strat,
+        threshold = 0.05)
+#All significantly different
+
+#Simpson 
+kruskal.test(matrices_strat_grouped$simpson~matrices_strat_grouped$STRAT_GROUPED)
+dt_simp_strat = dunnTest(simpson~STRAT_GROUPED, data=matrices_strat_grouped)
+dt_simpson_strat = dt_simp_strat$res
+#Kruskal-Wallis chi-squared = 191.17, df = 2, p-value < 2.2e-16
+cldList(P.adj~Comparison,
+        data = dt_simpson_strat,
+        threshold = 0.05)
+#All significantly different
+
+#Functional  
+kruskal.test(matrices_strat_grouped$func.div~matrices_strat_grouped$STRAT_GROUPED)
+#Kruskal-Wallis chi-squared = 406.26, df = 2, p-value < 2.2e-16
+dt_fd_strat = dunnTest(func.div~STRAT_GROUPED, data=matrices_strat_grouped)
+dt_functional_strat = dt_fd_strat$res
+cldList(P.adj~Comparison,
+        data = dt_functional_strat,
+        threshold = 0.05)
+#All significantly different
+
+DunnTest_grouped_strata = cbind(dt_richnnes_strat, dt_simpson_strat, dt_shannon_strat, dt_functional_strat)
+write_csv(DunnTest_grouped_strata, "DunnTest_grouped_strata.csv") 
+
+```
+
 Dunn's test by strata 
 
 ```{r Dunn's test by strata}
@@ -1348,122 +1661,4 @@ DunnTest_strata = cbind(dt_richnnes_strat, dt_simpson_strat, dt_shannon_strat, d
 
 write_csv(DunnTest_strata, "DunnTest_strata.csv") 
 
-```
-
-Dunn's test by year 
-
-```{r Dunn's test by year}
-
-all_matrices_data$YEAR = factor(all_matrices_data$YEAR, levels=c("1999", "2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2014","2016"))
-levels(all_matrices_data$YEAR)
-
-#richness
-kruskal.test(all_matrices_data$richness~all_matrices_data$YEAR)
-#Kruskal-Wallis chi-squared = 199.14, df = 15, p-value < 2.2e-16
-
-dt_rich_year = dunnTest(richness~YEAR, data=all_matrices_data)
-dt_richnnes_year = dt_rich_year$res
-
-cldList(P.adj~Comparison,
-        data = dt_richnnes_year,
-        threshold = 0.05)
-
-#Shannon strata
-kruskal.test(all_matrices_data$shannon~all_matrices_data$YEAR)
-
-dt_shan_year = dunnTest(shannon~YEAR, data=all_matrices_data)
-dt_shannon_year = dt_shan_year$res
-
-cldList(P.adj~Comparison,
-        data = dt_shannon_year,
-        threshold = 0.05)
-
-#Simpson 
-kruskal.test(all_matrices_data$simpson~all_matrices_data$YEAR)
-
-dt_simp_year = dunnTest(simpson~YEAR, data=all_matrices_data)
-dt_simpson_year = dt_simp_year$res
-
-cldList(P.adj~Comparison,
-        data = dt_simpson_year,
-        threshold = 0.05)
-
-#Functional  
-kruskal.test(all_matrices_data$func.div~all_matrices_data$YEAR)
-
-dt_fd_year = dunnTest(func.div~YEAR, data=all_matrices_data)
-dt_functional_year = dt_fd_year$res
-
-cldList(P.adj~Comparison,
-        data = dt_functional_year,
-        threshold = 0.05)
-
-DunnTest_year = cbind(dt_richnnes_year, dt_simpson_year, dt_shannon_year, dt_functional_year)
-
-write_csv(DunnTest_year, "DunnTest_year.csv") 
-
-```
-
-Diversity between SPA, SU, ER 
-
-"mapNumber" =  
-    0	Unprotected                 [unprotected]
-    1	Carysfort                   [Carysfort Sanctuary Preservation Area]
-    2	Elbow                       [Elbow Sanctuary Preservation Area]
-    3	Key_Largo_Dry_Rocks         [Key Largo Dry Rocks Sanctuary Preservation Area]
-    4	Grecian_Rocks               [Grecian Rocks Sanctuary Preservation Area]
-    5	French                      [French Reef Sanctuary Preservation Area]
-    6	Molasses                    [Molasses Reef Sanctuary Preservation Area]
-    7	Conch_Reef                  [Conch Reef Sanctuary Preservation Area]
-    8	Conch_RO                    [Conch Reef Research Only Area]
-    9	Davis                       [Davis Reef Sanctuary Preservation Area]
-    10 Hen_Chickens               [Hen and Chickens Sanctuary Preservation Area]
-    11 Cheeca_Rocks               [Cheeca Rocks Sanctuary Preservation Area]
-    12 Alligator                  [Alligator Reef Sanctuary Preservation Area]
-    13 Tennessee                  [Tennesse Reef Research Only Area]
-    14 Coffins_Patch              [Coffins Patch Sanctuary Preservation Area]
-    15 Sombrero                   [Sombrero Key Sanctuary Preservation Area]
-    16 Looe_Key                   [Looe Key Sanctuary Preservation Area]
-    17 Looe_RO                    [Looe Key Research Only Area]
-    18 Newfound_Harbor            [Newfound Harbor Key Sanctuary Preservation Area]
-    19 East_Sambo                 [Eastern Sambo Research Only Area]
-    20 West_Sambo                 [Western Sambo Ecological Reserve]
-    21 East_Dry_Rocks             [Eastern Dry Rocks Sanctuary Preservation Area]
-    22 Rock_Key                   [Rock Key Sanctuary Preservation Area]
-    23 Sand_Key                   [Sand Key Sanctuary Preservation Area]
-    24 North Ecological Reserve   [Tortugas North Ecological Reserve]
-    25 South Ecological Reserve   [Tortugas South Ecological Reserve]
-    26 Research Natural Area      [unprotected]
-    27 Not Protected              [unprotected]
-    28 Not Protected              [unprotected]
-
-```{r bargraph of diversity among different NTMR}
-
-all_matrices_data = read_csv("diversity_data.csv")
-
-diversity_ntmr = reshape2::melt(all_matrices_data, id.vars = c("MPA_NAME"),
-                                measure.vars=c("richness","shannon","simpson","func.div"))
-
-diversity_ntmr=plyr::ddply(diversity_ntmr, c("MPA_NAME", "variable"), summarize, 
-                           value.mean=mean(value),
-                           value.se=plotrix::std.error(value))
-levels(diversity_ntmr$variable)=c("Richness", "Shannon", "Simpson", "Functional")
-
-as.tibble(diversity_ntmr)
-
-diversity_ntmr_plot = diversity_ntmr %>%
-  ggplot(.,aes(x=MPA_NAME, y=value.mean,color=variable, group=variable, fill=variable))+ # 
-  geom_errorbar(aes(ymax=value.mean+value.se, ymin=value.mean-value.se), size=.6,width=0.3,position=position_dodge(.9))+
-  geom_bar(position="dodge",stat="identity", color="black",size=.3)+
-  labs(title="Biodiversity by Different Marine Zones", x="", y="Mean effective \nnumber of species (± SE)",color="",fill="")+
-  theme(
-    legend.position = "right",
-    legend.title=element_blank(),
-    axis.title.x=element_text(size=12),
-    axis.title.y=element_text(size=12),
-    legend.text=element_text(size=12),
-    plot.title=element_text(hjust=0.5))
-
-ggsave(file="diversity_by_level_of_protection.pdf",diversity_ntmr_plot, width=10,height=4, path="plots")
-  
 ```
