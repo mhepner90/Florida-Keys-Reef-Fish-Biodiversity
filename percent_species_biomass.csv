@@ -1,0 +1,108 @@
+FAMILY,SCINAME,COMNAME,biomass_sum,com_percent
+Haemulidae,Haemulon plumierii,White Grunt,11250.318386737905,7.887548743137435
+Lutjanidae,Ocyurus chrysurus,Yellowtail Snapper,10541.731757080213,7.390761773379409
+Kyphosidae,Kyphosus sectatrix,Bermuda Chub,8671.89344560444,6.079826356570521
+Haemulidae,Haemulon sciurus,Bluestriped Grunt,7255.404213719355,5.086731985677567
+Lutjanidae,Lutjanus griseus,Gray Snapper,7073.7353823921585,4.959364766995895
+Sphyraenidae,Sphyraena barracuda,Great Barracuda,6708.578815952531,4.703355104188087
+Pomacanthidae,Pomacanthus arcuatus,Gray Angelfish,4994.65908700243,3.501733519873207
+Carangidae,Caranx ruber,Bar Jack,4748.448658511652,3.329116471267807
+Acanthuridae,Acanthurus coeruleus,Blue Tang,4627.288371512016,3.244171526903503
+Acanthuridae,Acanthurus chirurgus,Doctorfish,4579.579344369956,3.21072293779386
+Carangidae,Caranx bartholomaei,Yellow Jack,4294.560197613846,3.0108972674895984
+Labridae,Lachnolaimus maximus,Hogfish,4159.973702151124,2.9165392674189823
+Serranidae,Mycteroperca bonaci,Black Grouper,4016.774878580045,2.816143201987778
+Lutjanidae,Lutjanus apodus,Schoolmaster,3973.050459207663,2.7854882038615387
+Scaridae,Sparisoma viride,Stoplight Parrotfish,3710.2102207452567,2.6012120686213147
+Scaridae,Scarus guacamaia,Rainbow Parrotfish,3369.180623567976,2.3621177178552757
+Scaridae,Scarus coelestinus,Midnight Parrotfish,3030.0145228121255,2.124329856234826
+Mullidae,Mulloidichthys martinicus,Yellow Goatfish,2908.441429001655,2.039095494830931
+Haemulidae,Haemulon flavolineatum,French Grunt,2797.273214351288,1.9611559484465393
+Lutjanidae,Lutjanus analis,Mutton Snapper,2749.715066890532,1.9278131404179035
+Haemulidae,Haemulon aurolineatum,Tomtate,2719.752800324529,1.9068067270996087
+Haemulidae,Anisotremus virginicus,Porkfish,2686.613695187011,1.883573046230252
+Acanthuridae,Acanthurus bahianus,Ocean Surgeon,2635.1566195863393,1.8474967168298277
+Scaridae,Scarus coeruleus,Blue Parrotfish,2199.8163643268254,1.5422815784514237
+Scaridae,Sparisoma aurofrenatum,Redband Parrotfish,1759.73681609139,1.2337437426105504
+Scaridae,Sparisoma rubripinne,Yellowtail Parrotfish,1659.291967199549,1.1633223007991431
+Serranidae,Epinephelus morio,Red Grouper,1509.1239035189226,1.0580401317771742
+Scaridae,Sparisoma chrysopterum,Redtail Parrotfish,1430.2807734813173,1.0027635600522158
+Pomacanthidae,Pomacanthus paru,French Angelfish,1293.8843624324575,0.9071366361239912
+Pomacentridae,Abudefduf saxatilis,Sergeant Major,1248.530618291943,0.875339325568426
+Sparidae,Calamus calamus,Saucereye Porgy,1023.4496996079781,0.7175360833630562
+Pomacanthidae,Holacanthus ciliaris,Queen Angelfish,960.406962091335,0.673337097345957
+Lutjanidae,Lutjanus mahogoni,Mahogany Snapper,851.8487806345744,0.5972274337549309
+Scaridae,Scarus vetula,Queen Parrotfish,829.4540114889148,0.5815265595969226
+Scaridae,Scarus iseri,Striped Parrotfish,825.1205882852958,0.5784884156468384
+Pomacanthidae,Holacanthus bermudensis,Blue Angelfish,819.4007525682007,0.5744782639808634
+Scombridae,Scomberomorus regalis,Cero,786.8057715196323,0.5516260661172642
+Haemulidae,Haemulon parra,Sailors Choice,768.3252087379149,0.5386694248267172
+Carangidae,Caranx crysos,Blue Runner,758.1879989343608,0.5315622716159067
+Labridae,Clepticus parrae,Creole Wrasse,718.9021742547344,0.5040191527082513
+Haemulidae,Haemulon chrysargyreum,Smallmouth Grunt,699.0646575522469,0.49011115699160357
+Haemulidae,Haemulon carbonarium,Caesar Grunt,637.5141481452337,0.44695836553949214
+Lutjanidae,Lutjanus synagris,Lane Snapper,574.8589451183484,0.40303107824882334
+Haemulidae,Anisotremus surinamensis,Black Margate,501.96217446391125,0.3519234729358948
+Scaridae,Scarus taeniopterus,Princess Parrotfish,428.9583278020125,0.3007407971050448
+Mullidae,Pseudupeneus maculatus,Spotted Goatfish,411.11757638752925,0.28823272475023765
+Labridae,Thalassoma bifasciatum,Bluehead,405.1617624675496,0.2840571298040295
+Pomacentridae,Stegastes partitus,Bicolor Damselfish,398.08080550276696,0.27909270201737946
+Labridae,Bodianus rufus,Spanish Hogfish,388.8328350248181,0.2726089905869629
+Serranidae,Cephalopholis cruentata,Graysby,376.4959497406167,0.26395965457062925
+Holocentridae,Holocentrus adscensionis,Squirrelfish,364.6565555312625,0.2556591073589536
+Aulostomidae,Aulostomus maculatus,Atlantic Trumpetfish,331.83433025336143,0.23264758956556714
+Haemulidae,Haemulon melanurum,Cottonwick,323.26322140419546,0.22663842284631877
+Pomacentridae,Chromis multilineata,Brown Chromis,310.0514394700153,0.2173757006363952
+Pomacanthidae,Holacanthus tricolor,Rock Beauty,290.7214786216425,0.20382355009688616
+Haemulidae,Haemulon macrostomum,Spanish Grunt,280.45157866551426,0.1966233684036644
+Labridae,Halichoeres bivittatus,Slippery Dick,277.01333635875113,0.19421283184344756
+Chaetodontidae,Chaetodon ocellatus,Spotfin Butterflyfish,248.2511166096716,0.174047766070809
+Labridae,Halichoeres garnoti,Yellowhead Wrasse,227.84945405273058,0.1597442501766625
+Sciaenidae,Pareques acuminatus,High Hat,205.1263307717176,0.1438131683784273
+Balistidae,Balistes capriscus,Gray Triggerfish,196.8134532187973,0.1379850464853007
+Pomacentridae,Microspathodon chrysurus,Yellowtail Damselfish,151.83147600217143,0.10644838008507895
+Labridae,Halichoeres maculipinna,Clown Wrasse,146.90861546637115,0.10299698421369055
+Serranidae,Epinephelus adscensionis,Rock Hind,135.00292760688671,0.09464995881546162
+Monacanthidae,Aluterus scriptus,Scrawled Filefish,112.10752156321668,0.07859809033001038
+Holocentridae,Holocentrus rufus,Longspine Squirrelfish,111.25888880073329,0.07800311763243752
+Ostraciidae,Lactophrys triqueter,Smooth Trunkfish,104.19426763423861,0.07305014280212392
+Chaetodontidae,Chaetodon sedentarius,Reef Butterflyfish,99.09792079046368,0.06947711644319035
+Serranidae,Cephalopholis fulva,Coney,96.85431826852499,0.06790413658220451
+Muraenidae,Gymnothorax moringa,Spotted Moray,87.61931719325455,0.06142951794296766
+Malacanthidae,Malacanthus plumieri,Sand Tilefish,79.80253350541601,0.055949205276877384
+Pomacentridae,Chromis cyanea,Blue Chromis,75.49711246046445,0.052930693517084265
+Labridae,Halichoeres radiatus,Puddingwife,66.48365147695482,0.04661139566186918
+Chaetodontidae,Chaetodon striatus,Banded Butterflyfish,57.337021135689305,0.04019873335559731
+Urolophidae,Urobatis jamaicensis,Yellow Stingray,55.47971556730574,0.03889658458985258
+Pomacentridae,Stegastes variabilis,Cocoa Damselfish,46.2081681710379,0.03239634348569162
+Pomacentridae,Stegastes adustus,Dusky Damselfish,42.34388332845334,0.02968711037730395
+Scaridae,Sparisoma atomarium,Greenblotch Parrotfish,41.470324935396434,0.029074662429756485
+Pomacentridae,Stegastes planifrons,Threespot Damselfish,36.77903436837046,0.02578561924505357
+Gobiidae,Coryphopterus personatus,Masked Goby,30.370818915924893,0.021292847574051397
+Serranidae,Hypoplectrus unicolor,Butter Hamlet,23.390537578724917,0.01639900302713795
+Labridae,Xyrichtys splendens,Green Razorfish,23.29630161524261,0.016332934607581093
+Serranidae,Serranus tigrinus,Harlequin Bass,21.63627519575681,0.01516909738551411
+Labridae,Halichoeres poeyi,Blackear Wrasse,18.589694597655598,0.01303315312675009
+Scaridae,Cryptotomus roseus,Bluelip Parrotfish,17.455015558384325,0.012237634642524902
+Tetraodontidae,Canthigaster rostrata,Sharpnose Puffer,15.595483595772349,0.010933924961578103
+Chaetodontidae,Chaetodon capistratus,Foureye Butterflyfish,15.387474577887128,0.010788090753942174
+Pomacentridae,Stegastes leucostictus,Beaugregory,15.289002373769204,0.010719052324706262
+Opistognathidae,Opistognathus aurifrons,Yellowhead Jawfish,10.89057967669442,0.007635337515621757
+Gobiidae,Coryphopterus glaucofraenum,Bridled Goby,10.46788041198951,0.0073389849201273396
+Pomacentridae,Chromis scotti,Purple Reeffish,9.102240874952377,0.00638154104666028
+Scaridae,Sparisoma radians,Bucktooth Parrotfish,8.203252513737468,0.005751264260275761
+Pomacentridae,Stegastes diencaeus,Longfin Damselfish,7.808471666653138,0.0054744851445926515
+Pomacentridae,Chromis insolata,Sunshinefish,6.75136548602572,0.004733352650404791
+Serranidae,Serranus tabacarius,Tobaccofish,6.620693220371153,0.004641738899638272
+Ostraciidae,Acanthostracion quadricornis,Scrawled Cowfish,5.219211773201852,0.0036591664206067787
+Gobiidae,Gnatholepis thompsoni,Goldspot Goby,4.071308810020076,0.002854376701485465
+Ptereleotridae,Ptereleotris calliura,Blue Dartfish,2.7728498471916665,0.0019440328331425186
+Serranidae,Hypoplectrus gemma,Blue Hamlet,2.7122636054230154,0.0019015560854909075
+Serranidae,Hypoplectrus puella,Barred Hamlet,2.4054718949939735,0.001686465766549168
+Labrisomidae,Malacoctenus macropus,Rosy Blenny,1.4320727364891512,0.0010040198974361294
+Gobiidae,Elacatinus oceanops,Neon Goby,1.120861517401758,7.858310804105883e-4
+Monacanthidae,Monacanthus tuckeri,Slender Filefish,1.0100659440678323,7.081527912143132e-4
+Serranidae,Serranus baldwini,Lantern Bass,0.9966704502896118,6.987612694384798e-4
+Blenniidae,Parablennius marmoreus,Seaweed Blenny,0.8675634436497633,6.082449148833225e-4
+Labrisomidae,Malacoctenus triangulatus,Saddled Blenny,0.7505025993429313,5.261740717619944e-4
+Gobiidae,Coryphopterus dicrus,Colon Goby,0.3597455601746672,2.522160301125239e-4
