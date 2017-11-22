@@ -2359,14 +2359,28 @@ if(!file.exists('Statistical_analysis/prot_offset.csv')){
 
 prot_offset = read_csv("Statistical_analysis/prot_offset.csv")
 
-prot_offset_plot = ggplot(prot_offset, aes(y=mean_offset, x=(prot_offset$Indices)))+ #color=(prot_offset$Indices) 
+prot_offset_plot = ggplot(prot_offset, aes(y=mean_offset, x=(prot_offset$Indices),color=(prot_offset$Indices)))+ #color=(prot_offset$Indices) 
   geom_line(aes())+
   geom_point(aes(), lwd=1)+
   geom_errorbar(aes(ymax=mean_offset+se_offset, ymin=mean_offset-se_offset),width=0.1)+
-  labs(title="", y="Mean Protection Offset (± SE)", x="")+
-  scale_y_continuous(limits = c(0, 110), breaks = c(0,10,20,30,40,50,60,70,80,90,100,110), labels=c("0","10","20","30","40","50","60","70","80","90","100","110"))
+  labs(title="", y="Mean Protection Offset (± SE)", x="",color="")+
+  scale_y_continuous(limits = c(0, 110), breaks = c(0,10,20,30,40,50,60,70,80,90,100,110), labels=c("0","10","20","30","40","50","60","70","80","90","100","110"))+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank())
+
 ggsave(file="prot_offset_plot.pdf", path="plots", prot_offset_plot, width=7, height=4)
-  
+
+prot_offset2 = prot_offset %>%
+  filter(Indices != "Abundance")
+
+prot_offset_plot2 = ggplot(prot_offset2, aes(y=mean_offset, x=(prot_offset2$Indices), color=(prot_offset2$Indices)))+  
+  geom_line(aes())+
+  geom_point(aes()), lwd=1)+
+  geom_errorbar(aes(ymax=mean_offset+se_offset, ymin=mean_offset-se_offset),width=0.1)+
+  labs(title="", y="Mean Offset (± SE)", x="",color="")+
+  theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank())
+
 ```
 
 # GAM and Partial Deviances 
