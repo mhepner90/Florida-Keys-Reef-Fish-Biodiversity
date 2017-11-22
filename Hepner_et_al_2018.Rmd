@@ -2299,6 +2299,79 @@ write_csv(DunnTest_strata, "DunnTest_strata.csv")
 
 ```
 
+```{r protection areas offset}
+
+all_matrices_data = read_csv("diversity_data.csv")
+
+offsets = all_matrices_data %>%
+  select(YEAR, PRIMARY_SAMPLE_UNIT, PROT, richness) %>% 
+  group_by(YEAR, PROT) %>%
+  summarize(
+      richness_mean = mean(richness)) %>%
+  spread(PROT,richness_mean) %>%
+  mutate(rich_offset = `1`-`0`)
+
+rich_offset = offsets %>%
+  ungroup() %>% 
+  summarize(
+      richness_offset = mean(rich_offset),
+      richness_n_offset = length(rich_offset),
+      richness_sd_offset = sd(rich_offset),
+      richness_se_offset = richness_sd_offset / sqrt(richness_n_offset))
+
+offsets = all_matrices_data %>%
+  select(YEAR, PRIMARY_SAMPLE_UNIT, PROT, abundance_sum, biomass_sum, evenness, richness, shannon, simpson, func.div) %>% 
+  group_by(YEAR, PROT) %>%
+  summarize(
+      abundance_mean = mean(abundance_sum),
+      biomass_mean = mean(biomass_sum),
+      evenness_mean = mean(evenness),
+      richness_mean = mean(richness),
+      shannon_mean = mean(shannon),
+      simpson_mean = mean(simpson),
+      functional_mean = mean(func.div)) %>%
+  gather("INDICES", "MEAN", 3:9) %>%
+  spread(PROT, MEAN) %>%
+  mutate(offset = `1`-`0`) 
+
+prot_offset = offsets %>%
+  select(-`1`,-`0`) %>%
+  spread(INDICES,offset) %>% 
+  ungroup() %>% 
+  summarize(
+      abun_mean_offset = mean(abundance_mean),
+      abun_n_offset = length(abundance_mean),
+      abun_sd_offset = sd(abundance_mean),
+      abun_se_offset = abun_sd_offset / sqrt(abun_n_offset), 
+      bio_mean_offset = mean(biomass_mean),
+      bio_n_offset = length(biomass_mean),
+      bio_sd_offset = sd(biomass_mean),
+      bio_se_offset = bio_sd_offset / sqrt(bio_n_offset),
+      even_mean_offset = mean(evenness_mean),
+      even_n_offset = length(evenness_mean),
+      even_sd_offset = sd(evenness_mean),
+      even_se_offset = even_sd_offset / sqrt(even_n_offset),
+      rich_mean_offset = mean(richness_mean),
+      rich_n_offset = length(richness_mean),
+      rich_sd_offset = sd(richness_mean),
+      rich_se_offset = rich_sd_offset / sqrt(rich_n_offset),
+      shan_mean_offset = mean(shannon_mean),
+      shan_n_offset = length(shannon_mean),
+      shan_sd_offset = sd(shannon_mean),
+      shan_se_offset = shan_sd_offset / sqrt(shan_n_offset),
+      simp_mean_offset = mean(simpson_mean),
+      simp_n_offset = length(simpson_mean),
+      simp_sd_offset = sd(simpson_mean),
+      simp_se_offset = simp_sd_offset / sqrt(simp_n_offset),
+      func_mean_offset = mean(functional_mean),
+      func_n_offset = length(functional_mean),
+      func_sd_offset = sd(functional_mean),
+      func_se_offset = func_sd_offset / sqrt(func_n_offset))
+
+write_csv(prot_offset, "prot_offset.csv")
+   
+```
+
 # GAM and Partial Deviances 
 
 Build GAM model with temporal, spatial, habitat and management variables 
