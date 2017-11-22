@@ -2301,28 +2301,14 @@ write_csv(DunnTest_strata, "DunnTest_strata.csv")
 
 ```{r protection areas offset}
 
-all_matrices_data = read_csv("diversity_data.csv")
-
-offsets = all_matrices_data %>%
-  select(YEAR, PRIMARY_SAMPLE_UNIT, PROT, richness) %>% 
-  group_by(YEAR, PROT) %>%
-  summarize(
-      richness_mean = mean(richness)) %>%
-  spread(PROT,richness_mean) %>%
-  mutate(rich_offset = `1`-`0`)
-
-rich_offset = offsets %>%
-  ungroup() %>% 
-  summarize(
-      richness_offset = mean(rich_offset),
-      richness_n_offset = length(rich_offset),
-      richness_sd_offset = sd(rich_offset),
-      richness_se_offset = richness_sd_offset / sqrt(richness_n_offset))
-
-offsets = all_matrices_data %>%
-  select(YEAR, PRIMARY_SAMPLE_UNIT, PROT, abundance_sum, biomass_sum, evenness, richness, shannon, simpson, func.div) %>% 
-  group_by(YEAR, PROT) %>%
-  summarize(
+if(!file.exists('Statistical_analysis/prot_offset.csv')){
+  
+  all_matrices_data = read_csv("diversity_data.csv")
+  
+  offsets = all_matrices_data %>%
+    select(YEAR, PRIMARY_SAMPLE_UNIT, PROT, abundance_sum, biomass_sum, evenness, richness, shannon, simpson, func.div) %>% 
+    group_by(YEAR, PROT) %>%
+    summarize(
       abundance_mean = mean(abundance_sum),
       biomass_mean = mean(biomass_sum),
       evenness_mean = mean(evenness),
@@ -2330,15 +2316,15 @@ offsets = all_matrices_data %>%
       shannon_mean = mean(shannon),
       simpson_mean = mean(simpson),
       functional_mean = mean(func.div)) %>%
-  gather("INDICES", "MEAN", 3:9) %>%
-  spread(PROT, MEAN) %>%
-  mutate(offset = `1`-`0`) 
-
-prot_offset = offsets %>%
-  select(-`1`,-`0`) %>%
-  spread(INDICES,offset) %>% 
-  ungroup() %>% 
-  summarize(
+    gather("INDICES", "MEAN", 3:9) %>%
+    spread(PROT, MEAN) %>%
+    mutate(offset = `1`-`0`) 
+  
+  prot_offset = offsets %>%
+    select(-`1`,-`0`) %>%
+    spread(INDICES,offset) %>% 
+    ungroup() %>% 
+    summarize(
       abun_mean_offset = mean(abundance_mean),
       abun_n_offset = length(abundance_mean),
       abun_sd_offset = sd(abundance_mean),
@@ -2367,9 +2353,20 @@ prot_offset = offsets %>%
       func_n_offset = length(functional_mean),
       func_sd_offset = sd(functional_mean),
       func_se_offset = func_sd_offset / sqrt(func_n_offset))
+  
+  #write_csv(prot_offset, "Statistical_analysis/prot_offset.csv") 
+  }
 
-write_csv(prot_offset, "prot_offset.csv")
-   
+prot_offset = read_csv("Statistical_analysis/prot_offset.csv")
+
+prot_offset_plot = ggplot(prot_offset, aes(y=mean_offset, x=(prot_offset$Indices)))+ #color=(prot_offset$Indices) 
+  geom_line(aes())+
+  geom_point(aes(), lwd=1)+
+  geom_errorbar(aes(ymax=mean_offset+se_offset, ymin=mean_offset-se_offset),width=0.1)+
+  labs(title="", y="Mean Protection Offset (± SE)", x="")+
+  scale_y_continuous(limits = c(0, 110), breaks = c(0,10,20,30,40,50,60,70,80,90,100,110), labels=c("0","10","20","30","40","50","60","70","80","90","100","110"))
+ggsave(file="prot_offset_plot.pdf", path="plots", prot_offset_plot, width=7, height=4)
+  
 ```
 
 # GAM and Partial Deviances 
