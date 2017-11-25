@@ -7241,25 +7241,29 @@ if(!file.exists("raoQ_list.csv")){
   func.dist.greg = read_rds("functional_diversity/func_dist_greg_rds")
   
   #read in trait matrix 
-  traits = read.csv('functional_diversity/species_trait_matrix_316_spp.csv')
+  traits = read.csv('species_trait_matrix.csv')
   #Set rownames on traits and remove other info
   rownames(traits) <- traits$SPECIES_CD
   traits <- traits[, -c(1:4)]
   #Convert rownames to all caps
   rownames(traits) <- toupper(rownames(traits))
   
-  sample_data = read_csv("big_csv/sample_data/FK/sample_data_all_years.csv")
+  sample_data = read_rds("sample_data_rds")
   #remove PSU-'s with 1 species [2006,602U INPR] [2016,  1010U, INPR] AND removed 2001 PSU 222U HRRF abundance 5X greater than normal (50,114 species)
-  sample_data = sample_data[!(sample_data$YEAR == "2006" & 
-                                  sample_data$PRIMARY_SAMPLE_UNIT == "602U" | 
-                                  sample_data$YEAR == "2016" & 
-                                  sample_data$PRIMARY_SAMPLE_UNIT == "1010U" | 
-                                  sample_data$YEAR == "2001" &
-                                  sample_data$PRIMARY_SAMPLE_UNIT == "222U"),]
-  saveRDS(sample_data, "sample_data_rds")
-  
-  psu_fk_abun <- read_csv("big_csv/abundance_psu/psu_fk_abun.csv", col_types = cols(protected_status = col_character())) #3,643,306*10
-    
+    sample_data = sample_data[!(sample_data$YEAR == "2006" & 
+                                sample_data$PRIMARY_SAMPLE_UNIT == "602U" | #only 1 species
+                                sample_data$YEAR == "2016" & 
+                                sample_data$PRIMARY_SAMPLE_UNIT == "1010U"| #only 1 species 
+                                sample_data$YEAR == "2002" &
+                                sample_data$PRIMARY_SAMPLE_UNIT =="472U"  | #one large school sp.
+                                sample_data$YEAR == "2003" &
+                                sample_data$PRIMARY_SAMPLE_UNIT =="119U"  | #one large school sp. 
+                                sample_data$YEAR == "2004" &
+                                sample_data$PRIMARY_SAMPLE_UNIT =="403U"  | #one large school sp.
+                                sample_data$YEAR == "2001" & 
+                                sample_data$PRIMARY_SAMPLE_UNIT =="222U"),]
+  #dim(sample_data) 5235   22
+
   #remove species not identified in species level and protected status all
   psu_fk_abun_no_spp = psu_fk_abun %>%
     filter(!stringr::str_detect(SPECIES_CD, 'SPE\\.$')) %>%
@@ -7267,40 +7271,41 @@ if(!file.exists("raoQ_list.csv")){
     #dim(psu_fk_abun_no_spp) #1,689,982      10
   
   #remove PSU-'s with 1 species [2006,602U INPR] [2016,  1010U, INPR] AND removed 2001 PSU 222U HRRF abundance 5X greater than normal (50,114 species)
-  psu_abun_sum = psu_fk_abun_no_spp[!(psu_fk_abun_no_spp$YEAR == "2006" & 
-                                  psu_fk_abun_no_spp$PRIMARY_SAMPLE_UNIT == "602U" | 
-                                  psu_fk_abun_no_spp$YEAR == "2016" & 
-                                  psu_fk_abun_no_spp$PRIMARY_SAMPLE_UNIT == "1010U" | 
-                                  psu_fk_abun_no_spp$YEAR == "2001" &
-                                  psu_fk_abun_no_spp$PRIMARY_SAMPLE_UNIT == "222U"),] 
-  #dim(psu_abun_sum) # 1,689,070 x 4 
+  psu_abun_sum = psu_fk_abun_no_spp[!(
+    psu_fk_abun_no_spp$YEAR == "2006" & psu_fk_abun_no_spp$PRIMARY_SAMPLE_UNIT == "602U" |
+      psu_fk_abun_no_spp$YEAR == "2002" & psu_fk_abun_no_spp$PRIMARY_SAMPLE_UNIT == "472U" |
+      psu_fk_abun_no_spp$YEAR == "2004" & psu_fk_abun_no_spp$PRIMARY_SAMPLE_UNIT =="403U"  |
+      psu_fk_abun_no_spp$YEAR == "2016" & psu_fk_abun_no_spp$PRIMARY_SAMPLE_UNIT == "1010U" |
+      psu_fk_abun_no_spp$YEAR == "2003" & psu_fk_abun_no_spp$PRIMARY_SAMPLE_UNIT == "119U" |
+      psu_fk_abun_no_spp$YEAR == "2001" & psu_fk_abun_no_spp$PRIMARY_SAMPLE_UNIT == "222U"),] 
+  #dim(psu_abun_sum) # 1688053x10
 
   abund = psu_abun_sum %>% 
-    select(YEAR, PRIMARY_SAMPLE_UNIT, STRAT, PROT, SPECIES_CD, abundance)
+    select(YEAR, PRIMARY_SAMPLE_UNIT, PROT, SPECIES_CD, abundance)
   #1,689,070 * 6
   
   # Cast abundance longways (species as columns)
   abundmat <- spread(abund, SPECIES_CD, abundance, fill = 0)
-  #dim(abundmat) #5238  352
+  #dim(abundmat) #5235  351
   
   # What is up with these species not being in the trait matrix??
   checkthese <- colnames(abundmat)[!colnames(abundmat) %in% rownames(traits)]
   
   # Subset species whose names only appear in traits
   abundmat <- abundmat[colnames(abundmat) %in% rownames(traits)] 
-  #dim(abundmat) #5,238    316
+  #dim(abundmat) #5,235    108
   
   # Drop communities with no species (roughly 500 sites)
   abundmat <- abundmat[!rowSums(abundmat) == 0,] 
-  #dim(abundmat) #5,241     316
+  #dim(abundmat) #5,235x108
   abundmat <- abundmat[!rowSums(abundmat) == 1,]
-  #dim(abundmat) #5240  316
+  #dim(abundmat) #5,235x108
   
   #Calculate relative values for community matrix
   rel.mat=abundmat/apply(abundmat,1,sum)
   
   #Ensure that all evenness calculations are not >1 (bug)
-  func.div.316=1/(1-apply(rel.mat,1,function(x) t(x) %*% as.matrix(func.dist.316) %*% x))
+  func.div=1/(1-apply(rel.mat,1,function(x) t(x) %*% as.matrix(func.dist) %*% x))
   func.div.ml=1/(1-apply(rel.mat,1,function(x) t(x) %*% as.matrix(func.dist.ml) %*% x))
   func.div.tl=1/(1-apply(rel.mat,1,function(x) t(x) %*% as.matrix(func.dist.tl) %*% x))
   func.div.tg=1/(1-apply(rel.mat,1,function(x) t(x) %*% as.matrix(func.dist.tg) %*% x))
@@ -7335,41 +7340,42 @@ raoQ_list = read_csv("raoQ_list.csv")
 # minus max length 
 linear_ml = lm(func.div.ml~func.div, data = raoQ_list)
 summary(linear_ml)
-#R-squared:  0.9319
+#R-squared:  0.996 
+#p-value: < 2.2e-16
 
 # minus trophic level 
 linear_tl = lm(func.div.tl~func.div, data = raoQ_list)
 summary(linear_tl)
-#R-squared:  0.8796
+#R-squared:  0.9323
 
 # minus trophic group 
 linear_tg = lm(func.div.tg~func.div, data = raoQ_list)
 summary(linear_tg)
-#R-squared:  0.5941
+#R-squared:  0.8359
 
 # minus water column position 
 linear_wc = lm(func.div.wc~func.div, data = raoQ_list)
 summary(linear_wc)
-#R-squared: 0.929
+#R-squared: 0.7641
 
 # minus substrate type 
 linear_st = lm(func.div.st~func.div, data = raoQ_list)
 summary(linear_st)
-#R-squared: 0.7554
+#R-squared: 0.9206
 
 # minus diel activity 
 linear_da = lm(func.div.da~func.div, data = raoQ_list)
 summary(linear_da)
-#R-squared: 0.7217
+#R-squared: 0.6491 
 
 # minus habitat complexity 
 linear_hc = lm(func.div.comp~func.div, data = raoQ_list)
 summary(linear_hc)
-#R-squared: 0.9782
+#R-squared: 0.9995
 
 # minus gregariousness 
 linear_greg = lm(func.div.greg~func.div, data = raoQ_list)
 summary(linear_greg)
-#R-squared: 0.9883
+#R-squared: 0.8919 
 
 ```
