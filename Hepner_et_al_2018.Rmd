@@ -1650,6 +1650,325 @@ ggsave(file="diversity_by_strata_grouped_bargraph.pdf",diversity_strata_grouped_
   
 ```
 
+```{r SD vs FD}
+
+all_matrices_data = read_csv("diversity_data.csv")
+
+sd_fd_plot_lm = ggplot(all_matrices_data,aes(x=simpson,y=func.div))+ 
+  #geom_line(aes(),lwd=1) +
+  geom_point(aes(color=STRAT_GROUPED),size=2)+
+  geom_smooth(method = "lm", color='#2C3E50')+
+  #stat_smooth(method="lm",fill=NA,colour="black",linetype=2,geom="ribbon") 
+  labs(title= "", x="Simpson Diversity", y="Functional Diversity", color = NULL)+
+  scale_color_manual(labels=c("High Relief", "Linear Relief", "Patch Reef"),values=c("red","blue","green"))+
+  theme_bw()+
+  theme(
+    legend.position="right",
+    legend.text = element_text(size=12),
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+ggsave(file="simpson_vs_functional_lm.pdf", width=5, height=3.5, path="plots")
+#grey area is 95% confidence level interval for predictions from a linear model 
+
+linear_simp_func = lm(simpson~func.div, data = all_matrices_data)
+summary(linear_simp_func)
+#Adjusted R-squared: 0.2746
+#p value:< 2.2e-16
+#5233 DF
+#Residual standard error: 2.792
+
+sd_fd_plot_poly = ggplot(all_matrices_data,aes(x=simpson,y=func.div))+ 
+  #geom_line(aes(),lwd=1) +
+  geom_point(aes(color=STRAT_GROUPED),size=2)+
+  geom_smooth(method = "loess", color='#2C3E50')+
+  #stat_smooth(method="lm",fill=NA,colour="black",linetype=2,geom="ribbon") 
+  labs(title= "", x="Simpson Diversity", y="Functional Diversity", color = NULL)+
+  scale_color_manual(labels=c("High Relief", "Linear Relief", "Patch Reef"),values=c("red","blue","green"))+
+  theme_bw()+
+  theme(
+    legend.position="right",
+    legend.text = element_text(size=12),
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+ggsave(file="simpson_vs_functional_poly.pdf", width=5, height=3.5, path="plots")
+
+sd_fd_year = all_matrices_data %>%
+  select(YEAR, PRIMARY_SAMPLE_UNIT, STRAT_GROUPED, PROT, simpson, func.div) %>%
+  group_by(YEAR)%>% 
+  summarize(
+    mean_simpson = mean(simpson),
+    mean_func = mean(func.div))
+
+mean_sd_fd_year_lm = ggplot(sd_fd_year,aes(x=mean_simpson,y=mean_func))+ 
+  geom_point(aes(),size=2)+ #
+  geom_smooth(method="lm", color='#2C3E50')+
+  #stat_smooth(method="lm",fill=NA,colour="black",linetype=2,geom="ribbon")
+  labs(title= "", x="Simpson Diversity", y="Functional Diversity", color ="")+
+  #scale_color_manual(labels=c("High Relief", "Linear Relief", "Patch Reef"),values=c("red","blue","green"))+
+  theme_bw()+
+  theme(
+    legend.position="right",
+    legend.text = element_text(size = 12),
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+ggsave(file="mean_simpson_vs_functional_year_lm.pdf", width=5, height=3.5, path="plots")
+
+linear_mean_simp_func_year = lm(mean_simpson~mean_func, data = sd_fd_year)
+summary(linear_mean_simp_func_year)
+#Adjusted R-squared: 0.4063 
+#p value: 0.004704
+#DF: 14
+#Residual standard error: 0.3536
+
+sd_fd_strat = all_matrices_data %>%
+  select(YEAR, PRIMARY_SAMPLE_UNIT, STRAT_GROUPED, PROT, simpson, func.div) %>%
+  group_by(YEAR, STRAT_GROUPED)%>% #PROT, STRAT_GROUPED
+  summarize(
+    mean_simpson = mean(simpson),
+    mean_func = mean(func.div))
+
+mean_sd_fd_strat_plot_lm = ggplot(sd_fd_strat,aes(x=mean_simpson,y=mean_func))+ 
+  geom_point(aes(color=STRAT_GROUPED),size=2)+ #
+  geom_smooth(method="lm", color='#2C3E50')+
+  #stat_smooth(method="lm",fill=NA,colour="black",linetype=2,geom="ribbon")
+  labs(title= "", x="Simpson Diversity", y="Functional Diversity", color ="")+
+  scale_color_manual(labels=c("High Relief", "Linear Relief", "Patch Reef"),values=c("red","blue","green"))+
+  theme_bw()+
+  theme(
+    legend.position="right",
+    legend.text = element_text(size = 12),
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+ggsave(file="mean_simpson_vs_functional_strat_lm.pdf", width=5, height=3.5, path="plots")
+
+linear_mean_simp_func = lm(mean_simpson~mean_func, data = sd_fd_strat)
+summary(linear_mean_simp_func)
+#Adjusted R-squared: 0.7162
+#p value: 2.196e-14
+#DF: 46
+#Residual standard error: 0.4972
+
+mean_sd_fd_strat_plot_poly = ggplot(sd_fd_strat,aes(x=mean_simpson,y=mean_func))+ 
+  geom_point(aes(color=STRAT_GROUPED),size=2)+ #
+  geom_smooth(method="loess", color='#2C3E50')+
+  #stat_smooth(method="lm",fill=NA,colour="black",linetype=2,geom="ribbon")
+  labs(title= "", x="Simpson Diversity", y="Functional Diversity", color ="")+
+  scale_color_manual(labels=c("High Relief", "Linear Relief", "Patch Reef"),values=c("red","blue","green"))+
+  theme_bw()+
+  theme(
+    legend.position="right",
+    legend.text = element_text(size = 12),
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+ggsave(file="mean_simpson_vs_functional_strat_poly.pdf", width=5, height=3.5, path="plots")
+
+sd_fd_strat_prot = all_matrices_data %>%
+  select(YEAR, PRIMARY_SAMPLE_UNIT, STRAT_GROUPED, PROT, simpson, func.div) %>%
+  group_by(YEAR, STRAT_GROUPED, PROT)%>% 
+  summarize(
+    mean_simpson = mean(simpson),
+    mean_func = mean(func.div))
+
+mean_sd_fd_strat_prot_plot_lm = ggplot(sd_fd_strat_prot,aes(x=mean_simpson,y=mean_func))+ 
+  geom_point(aes(color=STRAT_GROUPED),size=2)+ #
+  geom_smooth(method="lm", color='#2C3E50')+
+  #stat_smooth(method="lm",fill=NA,colour="black",linetype=2,geom="ribbon")
+  labs(title= "", x="Simpson Diversity", y="Functional Diversity", color ="")+
+  scale_color_manual(labels=c("High Relief", "Linear Relief", "Patch Reef"),values=c("red","blue","green"))+
+  theme_bw()+
+  theme(
+    legend.position="right",
+    legend.text = element_text(size = 12),
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+ggsave(file="mean_simpson_vs_functional_strat_prot_lm.pdf", width=5, height=3.5, path="plots")
+
+linear_mean_simp_func = lm(mean_simpson~mean_func, data = sd_fd_strat_prot)
+summary(linear_mean_simp_func)
+#Adjusted R-squared: 0.6473
+#p value: < 2.2e-16
+#DF: 94
+#Residual standard error: 0.6606
+
+mean_sd_fd_plot_strat_prot_poly = ggplot(sd_fd_strat_prot,aes(x=mean_simpson,y=mean_func))+ 
+  geom_point(aes(color=STRAT_GROUPED),size=2)+ #
+  geom_smooth(method="loess", color='#2C3E50')+
+  #stat_smooth(method="lm",fill=NA,colour="black",linetype=2,geom="ribbon")
+  labs(title= "", x="Simpson Diversity", y="Functional Diversity", color ="")+
+  scale_color_manual(labels=c("High Relief", "Linear Relief", "Patch Reef"),values=c("red","blue","green"))+
+  theme_bw()+
+  theme(
+    legend.position="right",
+    legend.text = element_text(size = 12),
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+ggsave(file="mean_simpson_vs_functional_strat_prot_poly.pdf", width=5, height=3.5, path="plots")
+
+```
+
+```{r richness vs SD}
+
+all_matrices_data = read_csv("diversity_data.csv")
+
+rich_sd_plot_lm = ggplot(all_matrices_data,aes(x=richness,y=simpson))+ 
+  #geom_line(aes(),lwd=1) +
+  geom_point(aes(color=STRAT_GROUPED),size=2)+
+  geom_smooth(method = "lm", color='#2C3E50')+
+  #stat_smooth(method="lm",fill=NA,colour="black",linetype=2,geom="ribbon") 
+  labs(title= "", x="Richness", y="Simpson Diversity", color = NULL)+
+  scale_color_manual(labels=c("High Relief", "Linear Relief", "Patch Reef"),values=c("red","blue","green"))+
+  theme_bw()+
+  theme(
+    legend.position="right",
+    legend.text = element_text(size=12),
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+ggsave(file="richness_vs_simpson_lm.pdf", width=5, height=3.5, path="plots")
+#grey area is 95% confidence level interval for predictions from a linear model 
+
+linear_rich_simp = lm(simpson~richness, data = all_matrices_data)
+summary(linear_rich_simp)
+#Adjusted R-squared: 0.08512
+#p value:< 2.2e-16
+#5233 DF
+#Residual standard error: 3.135
+
+rich_sd_plot_poly = ggplot(all_matrices_data,aes(x=richness,y=simpson))+ 
+  #geom_line(aes(),lwd=1) +
+  geom_point(aes(color=STRAT_GROUPED),size=2)+
+  geom_smooth(method = "loess", color='#2C3E50')+
+  #stat_smooth(method="lm",fill=NA,colour="black",linetype=2,geom="ribbon") 
+  labs(title= "", x="Richness", y="Simpson Diversityy", color = NULL)+
+  scale_color_manual(labels=c("High Relief", "Linear Relief", "Patch Reef"),values=c("red","blue","green"))+
+  theme_bw()+
+  theme(
+    legend.position="right",
+    legend.text = element_text(size=12),
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+ggsave(file="richness_vs_simpson_poly.pdf", width=5, height=3.5, path="plots")
+
+rich_sd_strat = all_matrices_data %>%
+  select(YEAR, PRIMARY_SAMPLE_UNIT, STRAT_GROUPED, PROT, simpson, richness) %>%
+  group_by(YEAR, STRAT_GROUPED)%>% #PROT, STRAT_GROUPED
+  summarize(
+    mean_simpson = mean(simpson),
+    mean_rich = mean(richness))
+
+mean_rich_sd_strat_plot_lm = ggplot(rich_sd_strat,aes(x=mean_rich,y=mean_simpson))+ 
+  geom_point(aes(color=STRAT_GROUPED),size=2)+ #
+  geom_smooth(method="lm", color='#2C3E50')+
+  #stat_smooth(method="lm",fill=NA,colour="black",linetype=2,geom="ribbon")
+  labs(title= "", x="Richness", y="Simpson Diversity", color ="")+
+  scale_color_manual(labels=c("High Relief", "Linear Relief", "Patch Reef"),values=c("red","blue","green"))+
+  theme_bw()+
+  theme(
+    legend.position="right",
+    legend.text = element_text(size = 12),
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+ggsave(file="mean_richness_vs_simpson_strat_lm.pdf", width=5, height=3.5, path="plots")
+
+linear_mean_rich_simp = lm(mean_rich~mean_simpson, data = rich_sd_strat)
+summary(linear_mean_rich_simp)
+#Adjusted R-squared: 0.4362
+#p value: 1.964e-07
+#DF: 46
+#Residual standard error: 4.364
+
+mean_sd_fd_strat_plot_poly = ggplot(rich_sd_strat,aes(x=mean_rich,y=mean_simpson))+ 
+  geom_point(aes(color=STRAT_GROUPED),size=2)+ #
+  geom_smooth(method="loess", color='#2C3E50')+
+  #stat_smooth(method="lm",fill=NA,colour="black",linetype=2,geom="ribbon")
+  labs(title= "Richness", x="", y="Simpson Diversity", color ="")+
+  scale_color_manual(labels=c("High Relief", "Linear Relief", "Patch Reef"),values=c("red","blue","green"))+
+  theme_bw()+
+  theme(
+    legend.position="right",
+    legend.text = element_text(size = 12),
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+#ggsave(file="mean_simpson_vs_functional_strat_poly.pdf", width=5, height=3.5, path="plots")
+
+rich_sd_strat_prot = all_matrices_data %>%
+  select(YEAR, PRIMARY_SAMPLE_UNIT, STRAT_GROUPED, PROT, simpson, richness) %>%
+  group_by(YEAR, STRAT_GROUPED, PROT)%>% 
+  summarize(
+    mean_simpson = mean(simpson),
+    mean_rich = mean(richness))
+
+mean_rich_sd_strat_prot_plot_lm = ggplot(rich_sd_strat_prot,aes(x=mean_rich,y=mean_simpson))+ 
+  geom_point(aes(color=STRAT_GROUPED),size=2)+ #
+  geom_smooth(method="lm", color='#2C3E50')+
+  #stat_smooth(method="lm",fill=NA,colour="black",linetype=2,geom="ribbon")
+  labs(title= "", x="Richness", y="Simpson Diversity", color ="")+
+  scale_color_manual(labels=c("High Relief", "Linear Relief", "Patch Reef"),values=c("red","blue","green"))+
+  theme_bw()+
+  theme(
+    legend.position="right",
+    legend.text = element_text(size = 12),
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+#ggsave(file="mean_simpson_vs_functional_strat_prot_lm.pdf", width=5, height=3.5, path="plots")
+
+linear_mean_rich_simp = lm(mean_rich~mean_simpson, data = rich_sd_strat_prot)
+summary(linear_mean_rich_simp)
+
+mean_rich_sd_plot_strat_prot_poly = ggplot(rich_sd_strat_prot,aes(x=mean_rich,y=mean_simpson))+ 
+  geom_point(aes(color=STRAT_GROUPED),size=2)+ #
+  geom_smooth(method="loess", color='#2C3E50')+
+  #stat_smooth(method="lm",fill=NA,colour="black",linetype=2,geom="ribbon")
+  labs(title= "", x="Richness", y="Simpson Diversity", color ="")+
+  scale_color_manual(labels=c("High Relief", "Linear Relief", "Patch Reef"),values=c("red","blue","green"))+
+  theme_bw()+
+  theme(
+    legend.position="right",
+    legend.text = element_text(size = 12),
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+#ggsave(file="mean_simpson_vs_functional_strat_prot_poly.pdf", width=5, height=3.5, path="plots")
+
+```
+
 #Statistical tests
 
 ```{r test for assumptions of normality }
@@ -2216,7 +2535,7 @@ write_csv(DunnTest_grouped_strata, "DunnTest_grouped_strata.csv")
 
 Dunn's test by grouped strata and protection 
 
-```{r Dunn's test by strat grouped and protection}
+```{r Dunn's test by grouped strata and protection}
 
 all_matrices_data = read_csv("diversity_data.csv")
 
@@ -7330,7 +7649,7 @@ if(!file.exists("raoQ_list.csv")){
 
 ```
 
-### Contributions of each trait to functional diversity. 
+Contributions of each trait to functional diversity. 
 - traits that contributed more to FD, when dropped from the matrix, will have a lower R^2 values. 
 
 ```{r FD linear regression}
