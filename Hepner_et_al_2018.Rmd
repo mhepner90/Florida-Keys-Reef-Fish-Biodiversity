@@ -1676,9 +1676,10 @@ ggsave(file="simpson_vs_functional_lm.pdf", width=5, height=3.5, path="plots")
 linear_simp_func = lm(simpson~func.div, data = all_matrices_data)
 summary(linear_simp_func)
 #Adjusted R-squared: 0.2746
-#p value:< 2.2e-16
+#p value:< 2.2e-16 0.000001
 #5233 DF
 #Residual standard error: 2.792
+#F-statistic:  1982
 
 sd_fd_plot_poly = ggplot(all_matrices_data,aes(x=simpson,y=func.div))+ 
   #geom_line(aes(),lwd=1) +
@@ -7696,5 +7697,77 @@ summary(linear_hc)
 linear_greg = lm(func.div.greg~func.div, data = raoQ_list)
 summary(linear_greg)
 #R-squared: 0.8919 
+
+```
+
+```{r numbers}
+
+all_matrices_data = read_csv("diversity_data.csv") #5235 x 18 
+
+hrrf_samples = all_matrices_data %>%
+  filter(STRAT_GROUPED == "HIGH_RELIEF")
+length(hrrf_samples$PRIMARY_SAMPLE_UNIT) #733 samples
+#(733/5235)*100 = 14% sampling events in HRRF strata
+
+hrrf_prot_samples = all_matrices_data %>%
+  filter(PROT != "0")%>% #1,392
+  filter(STRAT_GROUPED == "HIGH_RELIEF")
+length(hrrf_prot_samples$PRIMARY_SAMPLE_UNIT) #430 samples
+#(430/1392)*100 = 31% of protected samples in HRRF
+
+linear_samples = all_matrices_data %>%
+  filter(STRAT_GROUPED == "LINEAR_REEF")
+length(linear_samples$PRIMARY_SAMPLE_UNIT) #3033 samples
+#(3033/5235)*100 = 58% sampling events in Linear reef strata
+
+linear_prot_samples = all_matrices_data %>%
+  filter(PROT != "0")%>% #1,392
+  filter(STRAT_GROUPED == "LINEAR_REEF")
+length(linear_prot_samples$PRIMARY_SAMPLE_UNIT) #713 samples
+#(713/1392)*100 = 51% protected samples in linear reef 
+
+patch_samples = all_matrices_data %>%
+  filter(STRAT_GROUPED == "PATCH_REEF")
+length(patch_samples$PRIMARY_SAMPLE_UNIT) #1469 samples
+#(1469/5235)*100 = 28% sampling events in patch reef strata
+
+patch_prot_samples = all_matrices_data %>%
+  filter(PROT != "0")%>% #1,392
+  filter(STRAT_GROUPED == "PATCH_REEF")
+length(patch_prot_samples$PRIMARY_SAMPLE_UNIT) #249 samples
+#(249/1392)*100 = 18% protected samples in patch reef 
+
+trait_matrix = read_csv('species_trait_matrix.csv')
+
+hrrf_species = trait_matrix %>%
+  #filter(Complexity == "High") #5
+  #filter(Complexity == "Medium") #68
+  #filter(Complexity == "Low") #35
+length(hrrf_species$SPECIES_CD) 
+
+#68% of species prefer medium-high habitat complexity 
+
+species_abundance = read_csv("percent_species_abundance.csv")
+
+spabundance = species_abundance%>% #108 
+  select(-X1)%>% 
+  filter(percent < 1) #86 species with less than 1% abundance 
+  #filter(percent < 2) #95 species with less than 2% abundance 
+  #filter(percent <3) #100 species with less than 3% abundace 
+
+#Bicolor Damselfish,Bluehead, Masked Goby, Tomtate
+#12.44+11.62+10.27+6.27 = 40.6%
+#Four species of reef fish account for 41% of abundance data across years
+
+#... + White Grunt, Striped Parrotfish, Slippery Dick, Yellowtail Snapper,
+#12.44+11.62+10.27+6.27+4.83+4.45+3.66+3.20 = 57%
+#Six species of reef fish account for 57% of abundance data across years
+
+#... + Redband Parrotfish, French Grunt 
+#12.44+11.62+10.27+6.27+4.83+4.45+3.66+3.20+2.67+2.54 = 62%
+#Ten species of reef fish account for 62% of abundance data across years
+
+neon_goby = species_abundance %>%
+  filter(Common_name == "Neon Goby") #abundance 0.23%
 
 ```
