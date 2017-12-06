@@ -543,11 +543,11 @@ if(!file.exists("functional_distance_common_rds")){
   trait_matrix_common = trait_matrix %>%
     as.tibble() %>%
     mutate(
-      Common_name = toupper(as.character(Common_name))) %>% 
-    arrange(Common_name)%>% 
-    select(Common_name, Maxlength, Trophic_level, Trophic_group, Water_column, Diel_activity, Substrate_type, Complexity, Gregariousness) %>% #348*9
+      COMNAME = toupper(as.character(COMNAME))) %>% 
+    arrange(COMNAME)%>% 
+    select(COMNAME, Maxlength, Trophic_level, Trophic_group, Water_column, Diel_activity, Substrate_type, Complexity, Gregariousness) %>% #348*9
     group_by(
-      Common_name, Maxlength, Trophic_level, Trophic_group, Water_column, Diel_activity, Substrate_type, Complexity, Gregariousness) %>%
+      COMNAME, Maxlength, Trophic_level, Trophic_group, Water_column, Diel_activity, Substrate_type, Complexity, Gregariousness) %>%
     #summarize(n = n()) %>%
     #select(-n) %>%
     ungroup() %>%
@@ -558,25 +558,21 @@ if(!file.exists("functional_distance_common_rds")){
     as.data.frame()
   
   #Set species names as row.names and remove extra columns
-  rownames(trait_matrix_common)=trait_matrix_common$Common_name 
+  rownames(trait_matrix_common)=trait_matrix_common$COMNAME 
   
   #Calculate Gower distances. Variables have equal weight. 
   traits.dist.common = gowdis(trait_matrix_common, ord="podani")
   
-  trees_common=lapply(tree_methods,  function(i) hclust(traits.dist, method=i))
+  trees_common=lapply(tree_methods,  function(i) hclust(traits.dist.common, method=i))
+  par(mfrow=c(3,2))
+  for(i in 1:length(trees)) {plot(trees[[i]])}
   
   trees_ultra_common= lapply(trees_common,function(i) cl_ultrametric(as.hclust(i)))
   
-  #Plot each tree
-  par(mfrow=c(3,2))
-  for (i in 1:length(trees_ultra_common)) {plot(trees_ultra_common[[i]])} #plots the 5 different kinds of trees 
-  
-  ensemble.trees=cl_ensemble(list=trees) #list of clusterings 
+  ensemble.trees=cl_ensemble(list=trees_common) #list of clusterings 
   class(ensemble.trees)
   consensus.tree=cl_consensus(ensemble.trees) #synthesizes the information in the elements of a cluster ensemble into a single clustering 
-  par(mar=c(1,1,1,1))
-  plot(consensus.tree, horiz=T)
-  
+
   all.trees=c(trees_ultra_common,consensus.tree[1])
   names(all.trees)=c(tree_methods,"consensus")
   (trees.dissim=lapply(all.trees,function(i)
@@ -613,6 +609,23 @@ par(pin=c(5.5,9))
 #par(mai = c(1,1,1,1))
 plot(dendrogram,
      main= "Florida Keys Reef Fish\nFunctional dendrogram", 
+     xlab = "Dissimilarity",
+     cex.lab = 1,
+     cex.axis =0.8,
+     ylab = "",
+     sub = NULL,
+     horiz = T,
+     ps=60, 
+     #hang = -1,
+     nodePar = list(cex = .007))
+dev.off()
+
+#plot functional dendrogram 
+pdf("functional_dendrogram3.pdf", width = 8, height = 10.5) 
+par(pin=c(5.5,9))
+#par(mai = c(1,1,1,1))
+plot(dendrogram,
+     main= "", 
      xlab = "Dissimilarity",
      cex.lab = 1,
      cex.axis =0.8,
