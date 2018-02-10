@@ -1121,6 +1121,245 @@ bio_prot = ggplot(matrices_ntmr,aes(x=YEAR,y=biomass_mean, colour=factor(PROT), 
   geom_line(aes(group=PROT),lwd=1) +
   geom_point(size=3) +
   geom_errorbar(aes(ymax=biomass_mean+biomass_se,ymin=biomass_mean-biomass_se),width=0.1)+
+  labs(title= "B) Biomass", x="Year", y="Mean biomass \nkg per 40,000 km2 (± SE)", color = NULL)+
+  scale_color_manual(
+    values =  c("blue","red"),
+    breaks = c("1", "0"), 
+    labels=c("Protected","Not Protected"))+
+  scale_x_continuous(limits = c(1999, 2016), breaks = c(1999,2000,2001,2002, 2003,2004,2005, 2006, 2007,2008, 2009,2010,2011, 2012,2013, 2014,2015, 2016), labels=c("","2000","","2002","","2004","","2006","","2008","","2010","","2012","","2014","","2016"))+
+  theme_bw()+
+  theme(
+    legend.position="none",
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+#ggsave(file="biomass_by_year_protection.pdf", path="plots")
+
+#evennness 
+eve_prot = ggplot(matrices_ntmr,aes(x=YEAR,y=evenness_mean, colour=factor(PROT), group=factor(PROT)))+ 
+  geom_line(aes(group=PROT),lwd=1) +
+  geom_point(size=3) +
+  geom_errorbar(aes(ymax=evenness_mean+evenness_se,ymin=evenness_mean-evenness_se),width=0.1)+
+  labs(title= "C) Evenness", x="Year", y="Mean evennness (± SE)", color = NULL)+
+  scale_color_manual(
+    values =  c("blue","red"),
+    breaks = c("1", "0"), 
+    labels=c("Protected","Not Protected"))+
+  scale_x_continuous(limits = c(1999, 2016), breaks = c(1999,2000,2001,2002, 2003,2004,2005, 2006, 2007,2008, 2009,2010,2011, 2012,2013, 2014,2015, 2016), labels=c("","2000","","2002","","2004","","2006","","2008","","2010","","2012","","2014","","2016"))+
+  theme_bw()+
+  theme(
+    legend.position="none",
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+#ggsave(file="evenness_by_year_protection.pdf", path="plots")
+
+#richness
+rich_prot = ggplot(matrices_ntmr,aes(x=YEAR,y=richness_mean, colour=factor(PROT), group=factor(PROT)))+ 
+  geom_line(aes(group=PROT),lwd=1) +
+  geom_point(size=3) +
+  geom_errorbar(aes(ymax=richness_mean+richness_se,ymin=richness_mean-richness_se),width=0.1)+
+  labs(title= "D) Richness", x="Year", y="Mean effective \nnumber of species (± SE)", color = NULL)+
+  scale_color_manual(
+    values =  c("blue","red"),
+    breaks = c("1", "0"), 
+    labels=c("Protected","Not Protected"))+
+  scale_x_continuous(limits = c(1999, 2016), breaks = c(1999,2000,2001,2002, 2003,2004,2005, 2006, 2007,2008, 2009,2010,2011, 2012,2013, 2014,2015, 2016), labels=c("","2000","","2002","","2004","","2006","","2008","","2010","","2012","","2014","","2016"))+
+  theme_bw()+
+  theme(
+    legend.position="none",
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+ggsave(file="richness_by_year_protection.pdf", path="plots")
+
+# shannon
+shan_prot = ggplot(matrices_ntmr,aes(x=YEAR,y=shannon_mean, colour=factor(PROT), group=factor(PROT)))+ 
+  geom_line(aes(group=PROT),lwd=1) +
+  geom_point(size=3) +
+  geom_errorbar(aes(ymax=shannon_mean+shannon_se,ymin=shannon_mean-shannon_se),width=0.1)+
+  labs(title= "E) Shannon", x="Year", y="Mean effective \nnumber of species (± SE)", color = NULL)+
+  scale_color_manual(
+    values =  c("blue","red"),
+    breaks = c("1", "0"), 
+    labels=c("Protected","Not Protected"))+
+  scale_x_continuous(limits = c(1999, 2016), breaks = c(1999,2000,2001,2002, 2003,2004,2005, 2006, 2007,2008, 2009,2010,2011, 2012,2013, 2014,2015, 2016), labels=c("","2000","","2002","","2004","","2006","","2008","","2010","","2012","","2014","","2016"))+
+  theme_bw()+
+  theme(
+    legend.position="none",
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+#ggsave(file="shannon_diversity_by_year_protection.pdf", path="plots")
+
+#simpson
+simp_prot = ggplot(matrices_ntmr,aes(x=YEAR,y=simpson_mean, colour=factor(PROT), group=factor(PROT)))+ 
+  geom_line(aes(group=PROT),lwd=1) +
+  geom_point(size=3) +
+  geom_errorbar(aes(ymax=simpson_mean+simpson_se,ymin=simpson_mean-simpson_se),width=0.1)+
+  labs(title= "F) Simpson", x="Year", y="Mean effective \nnumber of species (± SE)", color = NULL)+
+  scale_color_manual(
+    values =  c("blue","red"),
+    breaks = c("1", "0"), 
+    labels=c("Protected","Not Protected"))+
+  scale_x_continuous(limits = c(1999, 2016), breaks = c(1999,2000,2001,2002, 2003,2004,2005, 2006, 2007,2008, 2009,2010,2011, 2012,2013, 2014,2015, 2016), labels=c("","2000","","2002","","2004","","2006","","2008","","2010","","2012","","2014","","2016"))+
+  theme_bw()+
+  theme(
+    legend.position="none",
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+#ggsave(file="simpson_diversity_by_year_protection.pdf", path="plots")
+
+# functional
+func_prot = ggplot(matrices_ntmr,aes(x=YEAR,y=func.div_mean, colour=factor(PROT), group=factor(PROT)))+ 
+  geom_line(aes(group=PROT),lwd=1) +
+  geom_point(size=3) +
+  geom_errorbar(aes(ymax=func.div_mean+func.div_se,ymin=func.div_mean-func.div_se),width=0.1)+
+  labs(title= "G) Functional", x="Year", y="Mean effective \nnumber of species (± SE)", color = NULL)+
+  scale_color_manual(
+    values =  c("blue","red"),
+    breaks = c("1", "0"), 
+    labels=c("Protected","Not Protected"))+
+  scale_x_continuous(limits = c(1999, 2016), breaks = c(1999,2000,2001,2002, 2003,2004,2005, 2006, 2007,2008, 2009,2010,2011, 2012,2013, 2014,2015, 2016), labels=c("","2000","","2002","","2004","","2006","","2008","","2010","","2012","","2014","","2016"))+
+  theme_bw()+
+  theme(
+    legend.position="none",
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+#ggsave(file="functional_diversity_by_year_protection.pdf", path="plots")
+
+#save legend
+for_legend_prot_horiz = ggplot(matrices_ntmr,aes(x=YEAR,y=richness_mean, colour=factor(PROT), group=factor(PROT)))+ 
+  geom_line(aes(group=factor(PROT)),lwd=1) +
+  geom_point(size=3) +
+  labs(colour = "")+
+  scale_colour_manual(labels=c("Protected", "Not Protected"), values= c("red", "blue"))+
+    theme(
+      legend.position="right", #"none", "right",c(0.8,0.68),
+      legend.text=element_text(size=12),
+      legend.key.size=unit(5,"mm"))
+legend_prot_horiz <- get_legend(for_legend_prot_horiz)
+#ggsave(file="legend_year_protection.pdf", path="plots", legend_prot_horiz, width=3, height=2)
+for_legend_prot_vert = ggplot(matrices_ntmr,aes(x=YEAR,y=abundance_mean, colour=factor(PROT), group=factor(PROT)))+ 
+  geom_line(aes(group=factor(PROT)),lwd=1) +
+  geom_point(size=3) +
+  labs(colour = "")+
+  scale_colour_manual(labels=c("Protected", "Not Protected"), values= c("red", "blue"))+
+    theme(
+      legend.position="right", #"none", "right",c(0.8,0.68),
+      legend.text=element_text(size=11),
+      legend.key.size=unit(5,"mm"))
+
+legend_prot_vert <- get_legend(for_legend_prot_vert)
+
+#all plots on one page
+group_prot <- grid.arrange(abun_prot,bio_prot,eve_prot,rich_prot,shan_prot,simp_prot,func_prot,legend_prot_vert, ncol=2)
+ggsave(file="all_by_year_and_protection.pdf", group_prot, width=7.5, height=10, path="plots")
+
+group_prot_OSM_poster <- grid.arrange(abun_prot,bio_prot,eve_prot,rich_prot,shan_prot,simp_prot,func_prot, legend_prot_vert, ncol=2)
+ggsave(file="all_by_year_and_protection_poster.pdf", group_prot_OSM_poster, width=7.5, height=10, path="plots")
+
+group_prot <- grid.arrange(abun_prot,bio_prot,eve_prot,rich_prot,simp_prot,func_prot, ncol=3)
+ggsave(file="all6_by_year_and_protection.pdf", group_prot, width=10, height=7.5, path="plots")
+group_prot <- grid.arrange(abun_prot,bio_prot,eve_prot,rich_prot,simp_prot,func_prot, ncol=2)
+ggsave(file="all6_by_year_and_protection_long.pdf", group_prot, width=7.5, height=10, path="plots")
+
+#all diversity plots on one page
+g_prot <- grid.arrange(rich_prot,shan_prot,simp_prot,func_prot)
+ggsave(file="diversity_by_year_and_protection.pdf", g_prot, width=10, height=7, path="plots")
+
+```
+
+```{r plot all indices by year and dif marine zones}
+
+all_matrices_data = read_csv("diversity_data.csv")
+
+matrices_zones = all_matrices_data %>% 
+    group_by(YEAR, MPA_NAME) %>% #add subregion later 
+    summarize(
+      abundance_mean = mean(abundance_sum),
+      abundance_n = length(abundance_sum),
+      abundance_sd = sd(abundance_sum),
+      abundance_se = abundance_sd / sqrt(abundance_n),
+      abundance_min = min(abundance_sum),
+      abundance_max = max(abundance_sum),
+      biomass_mean = mean(biomass_sum),
+      biomass_n = length(biomass_sum),
+      biomass_sd = sd(biomass_sum),
+      biomass_se = biomass_sd / sqrt(biomass_n),
+      biomass_min = min(biomass_sum),
+      biomass_max = max(biomass_sum),
+      evenness_mean = mean(evenness),
+      evenness_n = length(evenness),
+      evenness_sd = sd(evenness),
+      evenness_se = evenness_sd / sqrt(evenness_n),
+      evenness_min = min(evenness),
+      evenness_max = max(evenness),
+      richness_mean = mean(richness),
+      richness_n = length(richness),
+      richness_sd = sd(richness),
+      richness_se = richness_sd / sqrt(richness_n),
+      richness_min = min(richness),
+      richness_max = max(richness),
+      shannon_n = length(shannon),
+      shannon_sd = sd(shannon),
+      shannon_se = shannon_sd / sqrt(shannon_n),
+      shannon_min = min(shannon),
+      shannon_max = max(shannon),
+      simpson_mean = mean(simpson),
+      simpson_n = length(simpson),
+      simpson_sd = sd(simpson),
+      simpson_se = simpson_sd / sqrt(simpson_n),
+      simpson_min = min(simpson),
+      simpson_max = max(simpson),
+      shannon_mean = mean(shannon),
+      func.div_mean = mean(func.div),
+      func.div_n = length(func.div),
+      func.div_sd = sd(func.div),
+      func.div_se = func.div_sd / sqrt(func.div_n),
+      func.div_min = min(func.div),
+      func.div_max = max(func.div))
+
+#abundance 
+abun_zones = ggplot(matrices_zones,aes(x=YEAR,y=abundance_mean, colour=factor(MPA_NAME), group=factor(MPA_NAME)))+ 
+  geom_line(aes(group=MPA_NAME),lwd=1) +
+  geom_point(size=3) +
+  geom_errorbar(aes(ymax=abundance_mean+abundance_se,ymin=abundance_mean-abundance_se),width=0.1)+
+  labs(title= "A) Abundance", x="Year", y="Mean abundance (± SE)", color = NULL)+
+  scale_color_manual(
+    values =  c("blue","red","orange","forestgreen"),
+    breaks = c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"), 
+    labels=c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"))+
+  scale_x_continuous(limits = c(1999, 2016), breaks = c(1999,2000,2001,2002, 2003,2004,2005, 2006, 2007,2008, 2009,2010,2011, 2012,2013, 2014,2015, 2016), labels=c("","2000","","2002","","2004","","2006","","2008","","2010","","2012","","2014","","2016"))+
+  theme_bw()+
+  theme(
+    legend.position="right",
+    panel.grid.major=element_blank(),
+    panel.grid.minor=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    title=element_text(size=12))
+#ggsave(file="abundance_by_year_protection.pdf", path="plots")
+
+#biomass 
+bio_prot = ggplot(matrices_ntmr,aes(x=YEAR,y=biomass_mean, colour=factor(PROT), group=factor(PROT)))+ 
+  geom_line(aes(group=PROT),lwd=1) +
+  geom_point(size=3) +
+  geom_errorbar(aes(ymax=biomass_mean+biomass_se,ymin=biomass_mean-biomass_se),width=0.1)+
   labs(title= "B) Biomass", x="Year", y="Mean biomass (± SE)", color = NULL)+
   scale_color_manual(
     values =  c("blue","red"),
@@ -1270,7 +1509,7 @@ legend_prot_vert <- get_legend(for_legend_prot_vert)
 group_prot <- grid.arrange(abun_prot,bio_prot,eve_prot,rich_prot,shan_prot,simp_prot,func_prot,legend_prot_vert, ncol=2)
 ggsave(file="all_by_year_and_protection.pdf", group_prot, width=7.5, height=10, path="plots")
 
-group_prot_OSM_poster <- grid.arrange(abun_prot,bio_prot,eve_prot,rich_prot,shan_prot,simp_prot,func_prot,legend_prot_vert, ncol=2)
+group_prot_OSM_poster <- grid.arrange(abun_prot,bio_prot,eve_prot,rich_prot,shan_prot,simp_prot,func_prot, ncol=2)
 ggsave(file="all_by_year_and_protection_poster.pdf", group_prot_OSM_poster, width=7.5, height=10, path="plots")
 
 group_prot <- grid.arrange(abun_prot,bio_prot,eve_prot,rich_prot,simp_prot,func_prot, ncol=3)
@@ -1341,7 +1580,7 @@ abun_gs= ggplot(matrices_strat_grouped,aes(x=YEAR,y=abundance_mean, colour=STRAT
   geom_line(aes(group=STRAT_GROUPED),lwd=1) +
   geom_point(size=3) +
  geom_errorbar(aes(ymin=abundance_mean-abundance_se, ymax=abundance_mean+abundance_se), width=.1)+
-  labs(title= "A) Abundance", x="Year", y="Mean abundance \nnumber of individuals (± SE)", colour = "Strata")+
+  labs(title= "A) Abundance", x="Year", y="Mean abundance (± SE)", colour = "Strata")+
   scale_colour_manual(labels=c("High reef", "Linear reef", "Patch reef"), values= c("red", "green", "blue"))+
   scale_x_continuous(limits = c(1999, 2016), breaks = c(2000,2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016), labels=c("2000","","2004","","2008","","2012","","2016"))+
   theme_bw()+
@@ -1359,7 +1598,7 @@ bio_gs= ggplot(matrices_strat_grouped,aes(x=YEAR,y=biomass_mean, colour=STRAT_GR
   geom_line(aes(group=STRAT_GROUPED),lwd=1) +
   geom_point(size=3) +
  geom_errorbar(aes(ymin=biomass_mean-biomass_se, ymax=biomass_mean+biomass_se), width=.1)+
-  labs(title= "B) Biomass", x="Year", y="Mean biomass \nkilograms (± SE)", colour = "Strata")+
+  labs(title= "B) Biomass", x="Year", y="Mean biomass \nkg per 40,000 km2 (± SE)", colour = "Strata")+
   scale_colour_manual(labels=c("High reef", "Linear reef", "Patch reef"), values= c("red", "green", "blue"))+
   scale_x_continuous(limits = c(1999, 2016), breaks = c(2000,2002, 2004, 2006, 2008, 2010, 2012, 2014, 2016), labels=c("2000","","2004","","2008","","2012","","2016"))+
   theme_bw()+
@@ -1476,7 +1715,7 @@ ggsave(file="legend_year_and_strata_grouped.pdf", legend_gs_horiz, width=10, hei
 
 #all plots on one page
 g_gs <- grid.arrange(abun_gs, bio_gs, even_gs, rich_gs, shan_gs, sim_gs, func_gs, legend_gs_horiz, ncol=2)
-ggsave(file="all_by_year_and_strata_grouped.pdf", g_gs, width=7, height=10, path="plots")
+ggsave(file="all_by_year_and_strata_grouped_poster.pdf", g_gs, width=7, height=10, path="plots")
 
 ```
 
@@ -1615,6 +1854,442 @@ diversity_ntmr_plot = diversity_ntmr %>%
     plot.title=element_text(hjust=0.5))
 
 ggsave(file="diversity_by_level_of_protection_bargraph.pdf",diversity_ntmr_plot, width=10,height=4, path="plots")
+
+```
+
+```{r bargraph by different ntmr}
+
+diversity_ntmr = reshape2::melt(all_matrices_data, id.vars = c("MPA_NAME"),measure.vars=c("richness","shannon","simpson","func.div"))
+#"abundance_sum","biomass_sum","evenness",
+
+diversity_ntmr=plyr::ddply(diversity_ntmr, c("MPA_NAME", "variable"), summarize, 
+                           value.mean=mean(value),
+                           value.se=plotrix::std.error(value))
+levels(diversity_ntmr$variable)=c("Richness", "Shannon", "Simpson", "Functional") #"Abundance","Biomass","Evenness",
+
+x = c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use")
+
+as.tibble(diversity_ntmr)
+diversity_ntmr = diversity_ntmr %>%
+  mutate(MPA_NAME = factor(MPA_NAME, levels = x))%>%
+  arrange(MPA_NAME)
+
+diversity_ntmr_plot = diversity_ntmr %>%
+  ggplot(.,aes(x=variable, y=value.mean, color=MPA_NAME, fill=MPA_NAME))+  
+  geom_errorbar(aes(ymax=value.mean+value.se, ymin=value.mean-value.se), size=.6,width=0.3,position=position_dodge(.9))+
+  geom_bar(position="dodge",stat="identity", color="black",size=.3)+
+  labs(title="Biodiversity by Different Marine Zones", x="", y="",color="",fill="")+
+   scale_fill_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+     values=c(
+              "Not Protected"="red",
+              "Ecological Reserve"="forestgreen",
+              "Sanctuary Preservation Area"="orange",
+              "Special Use"="blue"))+
+   scale_color_manual(
+         labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+     values=c(
+              "Not Protected"="red",
+              "Ecological Reserve"="forestgreen",
+              "Sanctuary Preservation Area"="orange",
+              "Special Use"="blue"))+
+  theme(
+    legend.position = "right",
+    legend.title=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    legend.text=element_text(size=12),
+    plot.title=element_text(hjust=0.5))
+
+ggsave(file="diversity_by_level_of_protection_bargraph.pdf",diversity_ntmr_plot, width=10,height=4, path="plots")
+
+#Abundance on seperate plot 
+diversity_ntmr_abun = reshape2::melt(all_matrices_data, id.vars = c("MPA_NAME"),measure.vars=c("abundance_sum"))
+#"evenness",
+
+diversity_ntmr_abun=plyr::ddply(diversity_ntmr_abun, c("MPA_NAME", "variable"), summarize, 
+                           value.mean=mean(value),
+                           value.se=plotrix::std.error(value))
+levels(diversity_ntmr_abun$variable)=c("abundance_sum"="Abundance") 
+
+x = c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use")
+
+as.tibble(diversity_ntmr_abun)
+diversity_ntmr_abun = diversity_ntmr_abun %>%
+  mutate(MPA_NAME = factor(MPA_NAME, levels = x))%>%
+  arrange(MPA_NAME)
+
+diversity_ntmr_abun_plot = diversity_ntmr_abun %>%
+  ggplot(.,aes(x=variable, y=value.mean, color=MPA_NAME, fill=MPA_NAME))+  
+  geom_errorbar(aes(ymax=value.mean+value.se, ymin=value.mean-value.se), size=.6,width=0.3,position=position_dodge(.9))+
+  geom_bar(position="dodge",stat="identity", color="black",size=.3)+
+  labs(title="A) Abundance", x="", y="Mean Abundance \nnumber of individuals (± SE)",color="",fill="")+
+   scale_fill_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+     values=c(
+              "Not Protected"="red",
+              "Ecological Reserve"="forestgreen",
+              "Sanctuary Preservation Area"="orange",
+              "Special Use"="blue"))+
+   scale_color_manual(
+         labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+     values=c(
+              "Not Protected"="red",
+              "Ecological Reserve"="forestgreen",
+              "Sanctuary Preservation Area"="orange",
+              "Special Use"="blue"))+
+  theme(
+    legend.position = "right",
+    legend.title=element_blank(),
+    axis.title.x=element_blank(),
+    axis.title.y=element_text(size=12),
+    legend.text=element_text(size=12))
+    #plot.title=element_text(hjust=0.5))
+
+ggsave(file="abundance_by_level_of_protection_bargraph.pdf",diversity_ntmr_abun_plot, width=10,height=4, path="plots")
+#Biomass on seperate plot 
+
+diversity_ntmr_bio = reshape2::melt(all_matrices_data, id.vars = c("MPA_NAME"),measure.vars=c("biomass_sum"))
+#"evenness",
+
+diversity_ntmr_bio=plyr::ddply(diversity_ntmr_bio, c("MPA_NAME", "variable"), summarize, 
+                           value.mean=mean(value),
+                           value.se=plotrix::std.error(value))
+levels(diversity_ntmr_bio$variable)=c("biomass_sum"="Biomass") 
+
+x = c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use")
+
+as.tibble(diversity_ntmr_bio)
+diversity_ntmr_bio = diversity_ntmr_bio %>%
+  mutate(MPA_NAME = factor(MPA_NAME, levels = x))%>%
+  arrange(MPA_NAME)
+
+diversity_ntmr_bio_plot = diversity_ntmr_bio %>%
+  ggplot(.,aes(x=variable, y=value.mean, color=MPA_NAME, fill=MPA_NAME))+  
+  geom_errorbar(aes(ymax=value.mean+value.se, ymin=value.mean-value.se), size=.6,width=0.3,position=position_dodge(.9))+
+  geom_bar(position="dodge",stat="identity", color="black",size=.3)+
+  labs(title="B) Biomass", x="", y="Mean Biomass \nkilograms per (± SE)",color="",fill="")+
+   scale_fill_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+     values=c(
+              "Not Protected"="red",
+              "Ecological Reserve"="forestgreen",
+              "Sanctuary Preservation Area"="orange",
+              "Special Use"="blue"))+
+   scale_color_manual(
+         labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+     values=c(
+              "Not Protected"="red",
+              "Ecological Reserve"="forestgreen",
+              "Sanctuary Preservation Area"="orange",
+              "Special Use"="blue"))+
+  theme(
+    legend.position = "right",
+    legend.title=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    legend.text=element_text(size=12),
+    plot.title=element_text(hjust=0.5))
+
+```
+
+```{r bargraph ntmr}
+
+all_matrices_data = read_csv("diversity_data.csv")
+
+x = c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use")
+
+matrices_marine_zones = all_matrices_data %>% 
+  group_by(MPA_NAME) %>% #add subregion later 
+  summarize(
+    abundance_mean = mean(abundance_sum),
+    abundance_n = length(abundance_sum),
+    abundance_sd = sd(abundance_sum),
+    abundance_se = abundance_sd / sqrt(abundance_n),
+    abundance_min = min(abundance_sum),
+    abundance_max = max(abundance_sum),
+    biomass_mean = mean(biomass_sum),
+    biomass_n = length(biomass_sum),
+    biomass_sd = sd(biomass_sum),
+    biomass_se = biomass_sd / sqrt(biomass_n),
+    biomass_min = min(biomass_sum),
+    biomass_max = max(biomass_sum),
+    evenness_mean = mean(evenness),
+    evenness_n = length(evenness),
+    evenness_sd = sd(evenness),
+    evenness_se = evenness_sd / sqrt(evenness_n),
+    evenness_min = min(evenness),
+    evenness_max = max(evenness),
+    richness_mean = mean(richness),
+    richness_n = length(richness),
+    richness_sd = sd(richness),
+    richness_se = richness_sd / sqrt(richness_n),
+    richness_min = min(richness),
+    richness_max = max(richness),
+    shannon_n = length(shannon),
+    shannon_sd = sd(shannon),
+    shannon_se = shannon_sd / sqrt(shannon_n),
+    shannon_min = min(shannon),
+    shannon_max = max(shannon),
+    simpson_mean = mean(simpson),
+    simpson_n = length(simpson),
+    simpson_sd = sd(simpson),
+    simpson_se = simpson_sd / sqrt(simpson_n),
+    simpson_min = min(simpson),
+    simpson_max = max(simpson),
+    shannon_mean = mean(shannon),
+    func.div_mean = mean(func.div),
+    func.div_n = length(func.div),
+    func.div_sd = sd(func.div),
+    func.div_se = func.div_sd / sqrt(func.div_n),
+    func.div_min = min(func.div),
+    func.div_max = max(func.div)) %>%
+  mutate(MPA_NAME = factor(MPA_NAME, levels = x))%>%
+  arrange(MPA_NAME)
+
+#Abundance 
+abundance_ntmr_plot =  
+  ggplot(matrices_marine_zones,aes(x=MPA_NAME, y=abundance_mean, color=MPA_NAME, fill=MPA_NAME))+  
+  geom_bar(position="dodge",stat="identity",color="black",size=.3)+ # color="black",size=.3
+  geom_errorbar(aes(max=abundance_mean+abundance_se, min=abundance_mean-abundance_se), size=.6,width=0.3,position=position_dodge(.9))+
+  labs(title="A) Abundance", x="", y="Mean abundance (± SE)",color="",fill="")+ #\nnumber of individuals
+  scale_fill_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  scale_color_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  theme(
+    legend.position = "none",
+    legend.title=element_blank(),
+    axis.text.x = element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    legend.text=element_text(size=12),
+    plot.title=element_text(hjust=0, size=14))
+ggsave(file="abundance_by_level_of_protection_bargraph.pdf",abundance_ntmr_plot, width=10,height=4, path="plots")
+
+#Biomass
+biomass_ntmr_plot =  
+  ggplot(matrices_marine_zones,aes(x=MPA_NAME, y=biomass_mean, color=MPA_NAME, fill=MPA_NAME))+  
+  geom_errorbar(aes(ymax=biomass_mean+biomass_se, ymin=biomass_mean-biomass_se), size=.6,width=0.3,position=position_dodge(.9))+
+  geom_bar(position="dodge",stat="identity")+ # color="black",size=.3
+  labs(title="B) Biomass", x="", y="Mean biomass (± SE)",color="",fill="")+ #\nkilograms per 40,000 km2
+  scale_fill_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  scale_color_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  theme(
+    legend.position = "none",
+    legend.title=element_blank(),
+    axis.text.x = element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    legend.text=element_text(size=12),
+    plot.title=element_text(hjust=0, size=14))
+ggsave(file="biomass_by_level_of_protection_bargraph.pdf",biomass_ntmr_plot, width=10,height=4, path="plots")
+
+#Evenness
+evenness_ntmr_plot =  
+  ggplot(matrices_marine_zones,aes(x=MPA_NAME, y=evenness_mean, color=MPA_NAME, fill=MPA_NAME))+  
+  geom_errorbar(aes(ymax=evenness_mean+evenness_se, ymin=evenness_mean-evenness_se), size=.6,width=0.3,position=position_dodge(.9))+
+  geom_bar(position="dodge",stat="identity")+ # color="black",size=.3
+  labs(title="C) Evenness", x="", y="Mean evenness (± SE)",color="",fill="")+
+  scale_fill_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  scale_color_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  theme(
+    legend.position = "none",
+    legend.title=element_blank(),
+    axis.text.x = element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    legend.text=element_text(size=12),
+    plot.title=element_text(hjust=0, size=14))
+ggsave(file="evenness_by_level_of_protection_bargraph.pdf",evenness_ntmr_plot, width=10,height=4, path="plots")
+
+#Richness
+richness_ntmr_plot =  
+  ggplot(matrices_marine_zones,aes(x=MPA_NAME, y=richness_mean, color=MPA_NAME, fill=MPA_NAME))+  
+  geom_errorbar(aes(ymax=richness_mean+richness_se, ymin=richness_mean-richness_se), size=.6,width=0.3,position=position_dodge(.9))+
+  geom_bar(position="dodge",stat="identity")+ # color="black",size=.3
+  labs(title="D) Richness ", x="", y="Mean richness (± SE)",color="",fill="")+ #\neffective number of species
+  scale_fill_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  scale_color_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  theme(
+    legend.position = "none",
+    legend.title=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.text.x = element_blank(),
+    axis.title.y=element_text(size=12),
+    legend.text=element_text(size=12),
+    plot.title=element_text(hjust=0, size=14))
+ggsave(file="richness_by_level_of_protection_bargraph.pdf",richness_ntmr_plot, width=10,height=4, path="plots")
+
+#Shannon
+shannon_ntmr_plot =  
+  ggplot(matrices_marine_zones,aes(x=MPA_NAME, y=shannon_mean, color=MPA_NAME, fill=MPA_NAME))+  
+  geom_errorbar(aes(ymax=shannon_mean+shannon_se, ymin=shannon_mean-shannon_se), size=.6,width=0.3,position=position_dodge(.9))+
+  geom_bar(position="dodge",stat="identity")+ # color="black",size=.3
+  labs(title="E) Shannon", x="", y="Mean Shannon (± SE)",color="",fill="")+#\neffective number of species
+  scale_fill_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  scale_color_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  theme(
+    legend.position = "none",
+    legend.title=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.text.x = element_blank(),
+    axis.title.y=element_text(size=12),
+    legend.text=element_text(size=12),
+    plot.title=element_text(hjust=0, size=14))
+ggsave(file="shannon_by_level_of_protection_bargraph.pdf",shannon_ntmr_plot, width=10,height=4, path="plots")
+
+#Simpson
+simpson_ntmr_plot =  
+  ggplot(matrices_marine_zones,aes(x=MPA_NAME, y=simpson_mean, color=MPA_NAME, fill=MPA_NAME))+  
+  geom_errorbar(aes(ymax=simpson_mean+simpson_se, ymin=simpson_mean-simpson_se), size=.6,width=0.3,position=position_dodge(.9))+
+  geom_bar(position="dodge",stat="identity")+ # color="black",size=.3
+  labs(title="F) Simpson", x="", y="Mean Simpson (± SE)",color="",fill="")+ #\neffective number of species
+  scale_fill_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  scale_color_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  theme(
+    legend.position = "none",
+    legend.title=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.text.x = element_blank(),
+    axis.title.y=element_text(size=12),
+    legend.text=element_text(size=12),
+    plot.title=element_text(hjust=0, size=14))
+ggsave(file="simpson_by_level_of_protection_bargraph.pdf",simpson_ntmr_plot, width=10,height=4, path="plots")
+
+#Functional
+functional_ntmr_plot =  
+  ggplot(matrices_marine_zones,aes(x=MPA_NAME, y=func.div_mean, color=MPA_NAME, fill=MPA_NAME))+  
+  geom_errorbar(aes(ymax=func.div_mean+func.div_se, ymin=func.div_mean-func.div_se), size=.6,width=0.3,position=position_dodge(.9))+
+  geom_bar(position="dodge",stat="identity")+ # color="black",size=.3
+  labs(title="G) Functional", x="", y="Mean functional (± SE)",color="",fill="")+ #\neffective number of species
+  scale_fill_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  scale_color_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  theme(
+    legend.position = "none",
+    legend.title=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.text.x = element_blank(),
+    axis.title.y=element_text(size=12),
+    legend.text=element_text(size=12),
+    plot.title=element_text(hjust=0, size=14))
+ggsave(file="functional_by_level_of_protection_bargraph.pdf",functional_ntmr_plot, width=10,height=4, path="plots")
+
+legend =  
+  ggplot(matrices_marine_zones,aes(x=MPA_NAME, y=func.div_mean, color=MPA_NAME, fill=MPA_NAME))+  
+  geom_errorbar(aes(ymax=func.div_mean+func.div_se, ymin=func.div_mean-func.div_se), size=.6,width=0.3,position=position_dodge(.9))+
+  geom_bar(position="dodge",stat="identity")+ # color="black",size=.3
+  labs(title="G) Functional", x="", y="Mean functional \neffective number of species (± SE)",color="",fill="")+
+  scale_fill_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  scale_color_manual(
+    labels= c("Not Protected","Ecological Reserve","Sanctuary Preservation Area","Special Use"),
+    values=c(
+      "Not Protected"="red",
+      "Ecological Reserve"="forestgreen",
+      "Sanctuary Preservation Area"="orange",
+      "Special Use"="blue"))+
+  theme(
+    legend.position = "right",
+    legend.title=element_blank(),
+    axis.title.x=element_text(size=12),
+    axis.title.y=element_text(size=12),
+    legend.text=element_text(size=12),
+    plot.title=element_text(hjust=0, size=14))
+
+ntmr_legend = get_legend(legend)
+
+group_ntmr <- grid.arrange(abundance_ntmr_plot,biomass_ntmr_plot,evenness_ntmr_plot, richness_ntmr_plot,shannon_ntmr_plot,simpson_ntmr_plot,functional_ntmr_plot, ntmr_legend, ncol=2)
+
+ggsave(file="all_by_ntmr_bargraph_noxaxis.pdf", group_ntmr, width=7.5, height=10, path="plots")
+
 
 ```
 
@@ -2443,6 +3118,34 @@ all_matrices_data = read_csv("diversity_data.csv")
 all_matrices_data$MPA_NAME = factor(all_matrices_data$MPA_NAME, levels=c("Not Protected",               "Sanctuary Preservation Area","Ecological Reserve","Special Use"))
 levels(all_matrices_data$MPA_NAME)
 
+#Abundance 
+kruskal.test(all_matrices_data$abundance_sum~all_matrices_data$MPA_NAME)
+#Kruskal-Wallis chi-squared = 132.68, df = 3, p-value < 2.2e-16
+dt_abun_mpa = dunnTest(abundance_sum~MPA_NAME, data=all_matrices_data)
+dt_abundance_mpa = dt_abun_mpa$res
+cldList(P.adj~Comparison,
+        data = dt_abundance_mpa,
+        threshold = 0.05)
+#ER = Not Protected
+#SPA = SU
+
+#Biomass
+kruskal.test(all_matrices_data$biomass_sum~all_matrices_data$MPA_NAME)
+#Kruskal-Wallis chi-squared = 215.34, df = 3, p-value < 2.2e-16
+dt_bio_mpa = dunnTest(biomass_sum~MPA_NAME, data=all_matrices_data)
+dt_biomass_mpa = dt_abun_mpa$res
+
+cldList(P.adj~Comparison,
+        data = dt_biomass_mpa,
+        threshold = 0.05)
+#ER = Not Protected
+#SPA = SU
+
+#Evenness
+kruskal.test(all_matrices_data$evenness~all_matrices_data$MPA_NAME)
+#Kruskal-Wallis chi-squared = 5.2612, df = 3, p-value <  0.1536
+#No significant difference 
+
 #richness 
 kruskal.test(all_matrices_data$richness~all_matrices_data$MPA_NAME)
 #Kruskal-Wallis chi-squared = 164.29, df = 3, p-value < 2.2e-16
@@ -2478,8 +3181,8 @@ cldList(P.adj~Comparison,
         data = dt_simpson_mpa,
         threshold = 0.05)
 #ER=Not Protected
+#ER=SPA
 #ER=SU
-#ER=SPA 
 #SPA=SU 
 
 #Functional
@@ -2496,7 +3199,10 @@ cldList(P.adj~Comparison,
 #SU=SPA
 #Not protected not significanyly similar to anything 
 
-## All indices are significantly different by level of protection
+DunnTest_grouped_mpa = cbind(dt_abundance_mpa, dt_biomass_mpa, dt_richnnes_mpa, dt_shannon_mpa, dt_simpson_mpa, dt_functional_mpa)
+write_csv(DunnTest_grouped_mpa, "DunnTest_grouped_mpa.csv")
+
+## All indices are significantly different by level of protection except evenness
 
 ```
 
@@ -2898,6 +3604,36 @@ matrices_ntmr = all_matrices_data %>%
 #(1-(13.17177/36.82521))*100 Richness is on average across strata and years 64% greater than Shannon diversity (SR is 3 ties greater than Shannon)
 
 #(1-(1.857934/36.82521))*100 Richness is on average across strata and years 94% greater than Functional diversity or 20 (19.82052) times greater 
+
+matrices_ntmr = all_matrices_data %>% 
+    group_by(MPA_NAME) %>% #add subregion later 
+    summarize(
+      abundance_mean = mean(abundance_sum),
+      #abundance_min = min(abundance_sum),
+      #abundance_max = max(abundance_sum),
+      biomass_mean = mean(biomass_sum),
+      #biomass_min = min(biomass_sum),
+      #biomass_max = max(biomass_sum),
+      evenness_mean = mean(evenness),
+      #evenness_min = min(evenness),
+      #evenness_max = max(evenness),
+      richness_mean = mean(richness),
+      #richness_min = min(richness),
+      #richness_max = max(richness),
+      shannon_mean = mean(shannon),
+      #shannon_min = min(shannon),
+      #shannon_max = max(shannon),
+      simpson_mean = mean(simpson),
+      #simpson_min = min(simpson),
+      #simpson_max = max(simpson),
+      shannon_mean = mean(shannon),
+      func.div_mean = mean(func.div)) %>%
+      #func.div_min = min(func.div),
+      #func.div_max = max(func.div) %>%
+  gather("INDICES", "MEAN", 2:8) %>%
+  spread(MPA_NAME,MEAN) %>%
+  mutate(DIFF= (`Ecological Reserve`-`Not Protected`),
+         PERC= (1-(`Not Protected`/`Ecological Reserve`))*100)
 
 ```
 
@@ -6980,7 +7716,7 @@ write.csv(partial_deviance, "GAM/partial_deviance_table.csv")
 
 ```{r deviance barplot}
 
-partial_deviance_list = read_csv("partial_deviance_list.csv")
+partial_deviance_list = read_csv("GAM/partial_deviance_list.csv")
 
 #partial_deviance_data=subset(partial_deviance_list, Predictor!="All")
 
@@ -6995,7 +7731,7 @@ partial_deviance_explained = ggplot(partial_deviance_data,aes(x= Diversity, y= P
     geom_errorbar(aes(max=(Partial_Deviance+Partial_Deviance_SE)*100,
                       min=(Partial_Deviance-Partial_Deviance_SE)*100),
                   width=0.3,size=0.6, position=position_dodge(width=0.9))+
-    labs(x="", y="Total Percent \nDeviance Explained")+
+    labs(x="", y="Total Percent \nDeviance Explained (± SE)")+
     #scale_fill_manual(values=c("grey50","grey80","white"))+
     theme_bw(base_size=18)+
     theme(
@@ -7005,7 +7741,7 @@ partial_deviance_explained = ggplot(partial_deviance_data,aes(x= Diversity, y= P
       axis.text = element_text(color="black"),
       legend.title=element_blank())
 
-ggsave(file="partial_deviance_explained.pdf", partial_deviance_explained, width=8, height=4, path="plots")
+ggsave(file="partial_deviance_explained.pdf", partial_deviance_explained, width=8, height=5, path="plots")
 
 ```
 
